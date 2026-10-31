@@ -4,7 +4,7 @@
 
 Wybrano OVHcloud VPS-1: Ubuntu 26.04 LTS, x86_64, około 4 GB RAM i 40 GB dysku. Konto administracyjne ubuntu; dostęp kluczem SSH. Docelowy adres aplikacji: nawyki.intmain.cc. Cloudflare zarządza DNS, a cała aplikacja i PostgreSQL będą na jednym VPS.
 
-Bieżący rejestr zabezpieczeń: vps-security.md. Zbudowany React będzie serwowany przez Spring Boot. Docker, Compose, PostgreSQL i bootstrap Caddy zostały zainstalowane 2026-10-31. DNS i publiczny HTTPS zweryfikowano 2026-10-31; proxy Cloudflare jest włączone i zweryfikowane, aplikacja jeszcze nie istnieje. Szczegóły i weryfikacja w runtime-installation.md. Nie zamawiamy kolejnego serwera.
+Bieżący rejestr zabezpieczeń: vps-security.md. Zbudowany React będzie serwowany przez Spring Boot. Docker, Compose, PostgreSQL i bootstrap Caddy zostały zainstalowane 2026-10-31. DNS i publiczny HTTPS zweryfikowano 2026-10-31; proxy Cloudflare jest włączone i zweryfikowane, pierwszy szkielet Java/React został wdrożony jako df4b2f2 (kontynuacja poniżej). Szczegóły i weryfikacja w runtime-installation.md. Nie zamawiamy kolejnego serwera.
 
 Nie dodajemy prywatnego klucza administratora do GitHub Actions. CI otrzyma osobną tożsamość wdrożeniową. Hasło konta ubuntu pozostaje przydatne do konsoli/sudo w razie potrzeby; logowanie SSH hasłem jest wyłączone po sprawdzeniu dostępu kluczem.
 
@@ -43,3 +43,7 @@ Użytkownik potwierdził ustawienie Full (strict) w Cloudflare. Kolejny niezale�
 ## Proxy potwierdzone 2026-10-31
 
 Użytkownik włączył Proxied dla nawyki.intmain.cc. Agent potwierdził adresy Cloudflare w publicznym DNS oraz odpowiedź HTTPS 200 z Server: cloudflare, CF-RAY, cf-cache-status: DYNAMIC i Cache-Control: no-store. Nadal wyświetlany jest placeholder; kod aplikacji nie został wdrożony. Wcześniejsze wpisy o DNS only dokumentują poprzedni etap.
+
+## Pierwszy szkielet aplikacji
+
+Wdrożono df4b2f2 przez pobieranie publicznego wydania GitHub po testach. Aktywny Caddyfile odpowiada teraz Caddyfile.app, a nie placeholderowi. Repozytorium nie przechowuje żadnych sekretów Actions; VPS używa publicznego API wydań. Publiczne API i strona React zweryfikowane. Pełna funkcjonalność kont i dziennika pozostaje kolejnym etapem.

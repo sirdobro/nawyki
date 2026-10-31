@@ -6,7 +6,7 @@ Repozytorium: https://github.com/sirdobro/nawyki.git
 
 Docelowy katalog lokalny: C:\Users\mikep\Documents\Prog\nawyki
 
-Użytkownik chce możliwie wcześnie klikać kolejne wersje online, bez konieczności uruchamiania aplikacji i bazy lokalnie. Kod może być edytowany lokalnie; budowanie i testy mają działać w GitHub Actions. Hosting całej aplikacji i PostgreSQL u jednego dostawcy. Zakupiono OVHcloud VPS-1 z Ubuntu 26.04 LTS. Serwer jest dostępny przez SSH; aplikacja nie została jeszcze wdrożona.
+Użytkownik chce możliwie wcześnie klikać kolejne wersje online, bez konieczności uruchamiania aplikacji i bazy lokalnie. Kod może być edytowany lokalnie; budowanie i testy mają działać w GitHub Actions. Hosting całej aplikacji i PostgreSQL u jednego dostawcy. Zakupiono OVHcloud VPS-1 z Ubuntu 26.04 LTS. Serwer jest dostępny przez SSH; pierwszy szkielet aplikacji wdrożono jako df4b2f2.
 
 ## Etapy
 
@@ -23,7 +23,7 @@ Hosting OVHcloud jest już zakupiony; nie zamawiamy następnego serwera. Nie two
 
 Branch → przegląd zmian/PR → testy → main → wdrożenie → sprawdzenie stałego adresu online.
 
-Ostateczny trigger wdrożenia zostanie uzgodniony przed włączeniem workflow. Zmiany w repozytorium nie powinny wykonywać dowolnego kodu z niezaufanego PR z dostępem do sekretów; nie używamy uprzywilejowanego pull_request_target do takiego budowania.
+Zatwierdzono: poprawna weryfikacja bieżącego main publikuje obraz jako publiczne wydanie GitHub, a VPS pobiera je co około trzy minuty. Prywatny klucz SSH nie jest przekazywany do GitHub. Zmiany w repozytorium nie powinny wykonywać dowolnego kodu z niezaufanego PR z dostępem do sekretów; nie używamy uprzywilejowanego pull_request_target do takiego budowania.
 
 Jedno środowisko online służy rozwojowi i demonstracji. Testy CI mają własną, usuwaną bazę PostgreSQL i fikcyjne dane. Nie podłączamy testów do bazy online.
 
@@ -38,6 +38,6 @@ Przed pierwszym wdrożeniem potrzebne są: zatwierdzony zakup serwera, adres apl
 - Konta zatwierdzone: wiele pseudonimowych kont z kluczem dostępu, bez e-maila i hasła; szczegóły w authentication.md.
 - Cel N dni w pierwszym i ostatnim niepełnym tygodniu.
 - Konkretne wersje Spring Boot, zależności, Node i bibliotek testów właściwości.
-- VPS OVHcloud oraz domena nawyki.intmain.cc są wybrane; do konfiguracji pozostają DNS i polityka wdrożeń. Bez dodatkowych backupów i monitoringu w MVP.
+- VPS OVHcloud oraz domena nawyki.intmain.cc są wybrane; DNS, HTTPS i pierwsza automatyczna publikacja/wdrożenie są zweryfikowane. Bez dodatkowych backupów i monitoringu w MVP.
 
 Nie są to powody do ponownego otwierania ustalonego wyboru języka, bazy ani frontendu.

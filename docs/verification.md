@@ -18,3 +18,13 @@ Testy integracyjne sprawdzają gotowość bazy, JSON statusu, brak aktywnej reje
 GitHub Actions niezależnie powtarza build oraz testy i zachowuje raporty jako verification-reports przez 14 dni. Publikacja obrazu jest zależna od poprawnego zakończenia verify. Wynik biegu GitHub i publiczne wdrożenie należy potwierdzać osobno; sam ten dokument ich nie deklaruje.
 
 Do wykonania w dalszych etapach: pozostałe harmonogramy, konto i izolacja użytkowników, nawyki, treningi, dwa SSE, raporty współbieżne oraz ich testy. Obecne 100% nie opisuje pokrycia przyszłego MVP.
+
+## Potwierdzenie GitHub i wdrożenia
+
+Run https://github.com/sirdobro/nawyki/actions/runs/41192604750 zakończył się sukcesem dla df4b2f262dde22a4c6453879f3928a5c14a0a362. Oba joby verify i publish zakończyły się poprawnie. VPS pobrał wydanie, sprawdził sumę, uruchomił aplikację i przełączył proxy po healthcheck.
+
+Publiczne /api/health/ready zwróciło 200 i UP, a /api/status podało dokładny commit wydania oraz accountCreationEnabled=false. Przeglądarka wyświetliła zbudowanego Reacta, poprawny status połączenia i identyfikator wydania. Sprawdzono układ desktop i mobilny przy zadanej szerokości 390 px (obszar dokumentu 375 px); brak przewijania poziomego i brak błędów/warningów konsoli.
+
+Kontenery app i db były healthy, usługi systemowe bez błędów. Podczas kontroli aplikacja używała około 128 MB pamięci przy limicie 512 MB; to obserwacja fundamentu bez ruchu użytkowników, nie benchmark MVP. Skorygowano powielanie Cache-Control/nosniff na granicy Spring–Caddy i sprawdzono pojedyncze nagłówki przez publiczne HTTPS. Domyślny klient Python urllib otrzymał 403 od warstwy Cloudflare; standardowy curl i przeglądarka działały poprawnie, nie obniżano ochrony Cloudflare.
+
+Github Actions secrets zwróciły pustą listę. Nieużywana para kluczy CI została usunięta lokalnie; klucz administratora pozostał bez zmian. Konto deploy nie otrzymało dostępu SSH ani sudo.
