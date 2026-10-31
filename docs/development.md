@@ -6,7 +6,7 @@ Repozytorium: https://github.com/sirdobro/nawyki.git
 
 Docelowy katalog lokalny: C:\Users\mikep\Documents\Prog\nawyki
 
-Użytkownik chce możliwie wcześnie klikać kolejne wersje online, bez konieczności uruchamiania aplikacji i bazy lokalnie. Kod może być edytowany lokalnie; budowanie i testy mają działać w GitHub Actions. Hosting całej aplikacji i PostgreSQL u jednego dostawcy. Obecny kandydat: pojedynczy VPS Hetzner CX23; zakup i dostępność wymagają osobnego ustalenia.
+Użytkownik chce możliwie wcześnie klikać kolejne wersje online, bez konieczności uruchamiania aplikacji i bazy lokalnie. Kod może być edytowany lokalnie; budowanie i testy mają działać w GitHub Actions. Hosting całej aplikacji i PostgreSQL u jednego dostawcy. Zakupiono OVHcloud VPS-1 z Ubuntu 26.04 LTS. Serwer jest dostępny przez SSH; aplikacja nie została jeszcze wdrożona.
 
 ## Etapy
 
@@ -17,7 +17,7 @@ Użytkownik chce możliwie wcześnie klikać kolejne wersje online, bez konieczn
 5. Nawyki, wykonania i historia; następnie serie, raporty, minimalne treningi i SSE.
 6. Weryfikacja wszystkich wymagań, dokumentacja PDF i czyste archiwum źródeł.
 
-Nie kupujemy hostingu przed gotowym szkieletem do wdrożenia. Nie tworzymy teraz pozornego CI bez kompilowalnej aplikacji.
+Hosting OVHcloud jest już zakupiony; nie zamawiamy następnego serwera. Nie tworzymy teraz pozornego CI bez kompilowalnej aplikacji.
 
 ## Docelowy przepływ
 
@@ -31,13 +31,13 @@ Jedno środowisko online służy rozwojowi i demonstracji. Testy CI mają własn
 
 Planowany pakiet: Spring Boot ze statycznym buildem Reacta; PostgreSQL jako osobny proces/kontener na tym samym VPS; reverse proxy i HTTPS. Docker Compose jest kandydatem do powtarzalnego uruchamiania, nie dodatkową usługą hostingową. Node nie musi działać na produkcji.
 
-Przed pierwszym wdrożeniem potrzebne są: zatwierdzony zakup serwera, adres aplikacji, dostęp wdrożeniowy, sekrety bazy, polityka dostępu, trwały wolumen PostgreSQL, kopie i procedura odtworzenia. Zdefiniujemy healthcheck, zachowanie podczas migracji i powrót do poprzedniego obrazu. Cofnięcie aplikacji nie cofa automatycznie zmian schematu bazy.
+Przed pierwszym wdrożeniem potrzebne są: zatwierdzony zakup serwera, adres aplikacji nawyki.intmain.cc, dostęp wdrożeniowy, sekrety bazy, polityka dostępu i trwały wolumen PostgreSQL. Użytkownik wyłączył stałe eksporty i dodatkowy system backupu z zakresu MVP; dane są testowe, pozostaje backup OVH. Zdefiniujemy healthcheck, zachowanie podczas migracji i powrót do poprzedniego obrazu. Cofnięcie aplikacji nie cofa automatycznie zmian schematu bazy.
 
 ## Otwarte decyzje
 
-- Logowanie jednego właściciela lub zatwierdzony tryb demonstracyjny.
+- Konta zatwierdzone: wiele pseudonimowych kont z kluczem dostępu, bez e-maila i hasła; szczegóły w authentication.md.
 - Cel N dni w pierwszym i ostatnim niepełnym tygodniu.
 - Konkretne wersje Spring Boot, zależności, Node i bibliotek testów właściwości.
-- Zakup/lokalizacja VPS, domena, kopie i polityka wdrożeń.
+- VPS OVHcloud oraz domena nawyki.intmain.cc są wybrane; do konfiguracji pozostają DNS i polityka wdrożeń. Bez dodatkowych backupów i monitoringu w MVP.
 
 Nie są to powody do ponownego otwierania ustalonego wyboru języka, bazy ani frontendu.

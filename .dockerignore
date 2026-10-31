@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+**/secrets
+**/node_modules
+**/target
+**/dist
+**/coverage
+work
+private
+backups
+*.key
+*.pem

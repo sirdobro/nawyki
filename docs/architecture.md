@@ -26,6 +26,8 @@ Nazwy katalogów i pakietów zostaną ustalone przy implementacji. Nie tworzymy 
 
 ## Plan danych
 
+Zatwierdzone konta wieloużytkownikowe dodają account, access_key_verifier i session. Zasoby dziennika mają właściciela; odczyty, zapisy, raporty i SSE zawsze stosują zakres konta z uwierzytelnionej sesji. Szczegóły: authentication.md. Docelowy adres: https://nawyki.intmain.cc.
+
 Tabele: habit, habit_schedule_day (dla wybranych dni), habit_completion, workout, workout_exercise, workout_set. Obce klucze, kolejność ćwiczeń/serii oraz UNIQUE(habit_id, completion_date). Kształt schematu, ograniczenia i migracje zostaną dopracowane razem z modelem. Option/Optional mapujemy na SQL NULL wyłącznie na granicy, nie wpuszczając null do rdzenia.
 
 Trening i jego dzieci zapisujemy w jednej transakcji JDBC. Każda operacja współbieżna korzysta z własnych zasobów; nie przekazujemy wspólnego Connection między zadaniami. Publikacja zmiany do SSE następuje po zatwierdzeniu transakcji. Po ponownym połączeniu klient odświeża stan z REST, aby nie polegać na niezawodności ulotnych zdarzeń.

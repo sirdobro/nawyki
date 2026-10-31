@@ -43,6 +43,7 @@ pgdata/
 
 # Java outputs (Maven wrapper JAR remains trackable)
 **/target/
+/src/main/resources/static/
 *.class
 hs_err_pid*
 replay_pid*

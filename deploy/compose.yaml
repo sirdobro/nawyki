@@ -1,0 +1,80 @@
+name: nawyki
+
+services:
+  db:
+    image: ${POSTGRES_IMAGE:?Set an immutable PostgreSQL image reference}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nawyki
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_admin_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    secrets:
+      - db_admin_password
+      - db_app_password
+    volumes:
+      # Official PostgreSQL 18+ images use this parent directory.
+      - postgres_data:/var/lib/postgresql
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-app-role.sh:ro
+    networks:
+      - database
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          pg_isready -U postgres -d nawyki &&
+          psql -U postgres -d nawyki -tAc
+          "SELECT 1 FROM pg_roles WHERE rolname = 'nawyki' AND NOT rolsuper"
+          | grep -qx 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    mem_limit: 768m
+    shm_size: 128m
+    pids_limit: 200
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  proxy:
+    image: ${CADDY_IMAGE:?Set an immutable Caddy image reference}
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - edge
+    mem_limit: 128m
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+secrets:
+  db_admin_password:
+    file: ./secrets/db_admin_password
+  db_app_password:
+    file: ./secrets/db_app_password
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  database:
+    internal: true
+  edge:
+
+# Application service will be added once a tested Java image exists.
+# It will join both networks, use the nawyki DB role, and publish no host port.
+# Never run `docker compose down -v` unless data deletion is intentional.

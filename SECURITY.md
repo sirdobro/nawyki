@@ -12,12 +12,12 @@ Nie commitujemy źródłowych materiałów zajęć ani danych autorów bez potrz
 
 ## Przed udostępnieniem online
 
-- Uzgodnić dostęp: proponowany jeden właściciel z logowaniem albo jawnie zatwierdzona demonstracja na fikcyjnych danych. Brak decyzji nie oznacza zgody na publiczną edycję.
+- Zaimplementować zatwierdzone pseudonimowe konta z kluczem dostępu, sesjami i izolacją wszystkich danych oraz SSE; patrz docs/authentication.md.
 - HTTPS; PostgreSQL dostępny tylko wewnętrznie. Konto bazy bez uprawnień administratora.
 - Parametryzowane SQL; walidacja po stronie serwera; sensowne limity żądań i wielkości danych.
 - Ochrona sesji i CSRF, jeśli wybrana zostanie autoryzacja oparta na ciasteczkach. Nie przechowywać haseł w postaci jawnej.
 - SSE musi stosować te same zasady dostępu co REST, zamykać zasoby po rozłączeniu i poprawnie wznawiać/subskrybować stan po utracie połączenia.
-- Sprawdzone kopie PostgreSQL i procedura odtworzenia; aktualizacje systemu oraz zależności.
+- Aktualizacje systemu i zależności. Dla MVP dane są testowe i odtwarzalne; korzystamy z istniejącego backupu VPS OVH. Bez stałych eksportów bazy, dodatkowej usługi backupu i monitoringu.
 
 ## Testy i incydenty
 

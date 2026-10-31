@@ -1,0 +1,102 @@
+name: Verify and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nawyki-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres@sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8
+        env:
+          POSTGRES_DB: nawyki_test
+          POSTGRES_USER: ci
+          # Disposable runner-only database; never used by the deployed service.
+          POSTGRES_PASSWORD: ci_test_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U ci -d nawyki_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/nawyki_test
+      SPRING_DATASOURCE_USERNAME: ci
+      SPRING_DATASOURCE_PASSWORD: ci_test_only
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Frontend reproducible install and build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+      - name: Include the frontend in the Java application
+        run: |
+          mkdir -p src/main/resources/static
+          cp -R frontend/dist/. src/main/resources/static/
+      - name: Unit, property and PostgreSQL integration tests; coverage gate
+        run: ./mvnw -B -ntp verify
+      - name: Keep test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: verification-reports
+          path: |
+            target/site/jacoco/
+            target/surefire-reports/
+            target/failsafe-reports/
+          retention-days: 14
+
+  publish:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Build the immutable application image
+        run: docker build --tag "nawyki-app:${GITHUB_SHA}" .
+      - name: Publish the verified image for the VPS to pull
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          latest=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
+          if [ "$latest" != "$GITHUB_SHA" ]; then
+            echo "A newer commit exists; do not publish an outdated deployment."
+            exit 0
+          fi
+          docker save "nawyki-app:${GITHUB_SHA}" | gzip > nawyki-image.tar.gz
+          sha256sum nawyki-image.tar.gz > nawyki-image.sha256
+          tag="deploy-${GITHUB_SHA}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" nawyki-image.tar.gz nawyki-image.sha256 --clobber
+            gh release edit "$tag" --latest
+          else
+            gh release create "$tag" --target "$GITHUB_SHA" --latest \
+              --title "Deployment ${GITHUB_SHA:0:7}" \
+              --notes "Image published after frontend build, Java tests, PostgreSQL integration and coverage checks passed. The VPS polls for this release; publication alone does not prove deployment." \
+              nawyki-image.tar.gz nawyki-image.sha256
+          fi

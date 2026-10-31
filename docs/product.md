@@ -58,4 +58,4 @@ Wszystkie historyjki są obecnie planowane, nie zrealizowane.
 
 Polski język, responsywny układ, czytelne etykiety, obsługa klawiatury i widoczny fokus. Statusy nie mogą zależeć wyłącznie od koloru. Wygodne cele dotykowe około 44 px. Pokazujemy zapis, sukces i błąd z ponowieniem. Nie prezentujemy sukcesu bez potwierdzenia zapisu; ewentualne optymistyczne aktualizacje muszą obsługiwać wycofanie.
 
-Puste widoki prowadzą do pierwszego wpisu. Formularze zachowują dane po błędzie. Usunięcie treningu i archiwizacja wymagają świadomej akcji. Logowanie jednego właściciela pozostaje propozycją do zatwierdzenia; publiczna rejestracja nie jest uzgodniona.
+Puste widoki prowadzą do pierwszego wpisu. Formularze zachowują dane po błędzie. Usunięcie treningu i archiwizacja wymagają świadomej akcji. Zatwierdzono wiele pseudonimowych kont bez imienia, e-maila i hasła. Losowy klucz dostępu oraz opcjonalna prywatna zakładka służą do logowania; szczegóły w authentication.md.

@@ -1,0 +1,12 @@
+[Unit]
+Description=Pull and deploy verified Nawyki release
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flock -n /run/lock/nawyki-pull.lock /usr/local/sbin/nawyki-pull-release
+TimeoutStartSec=10min
+UMask=0077
+Nice=10

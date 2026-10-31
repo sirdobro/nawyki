@@ -30,7 +30,7 @@ User-facing product text and project documentation default to Polish. Code ident
 
 Follow docs/product.md. Daily habits and selected-weekday habits have scheduled-day streaks. N-days-per-week habits have weekly streaks. Do not count unfinished current periods as failures. Dates follow the configured user time zone, initially Europe/Warsaw. Prevent duplicate habit/date completions in the database as well as in application logic.
 
-The current product is online-first; do not add offline synchronization. A single owner with login is proposed but not approved scope. Do not publish a writable personal journal until access control or an explicitly approved public-demo policy is in place.
+The current product is online-first; do not add offline synchronization. Approved access model: multiple pseudonymous accounts without names, emails or passwords. Use a cryptographically random access key, manual entry and an optional private bookmark with a URL fragment; exchange it for an independent HttpOnly session cookie and remove the fragment immediately. Store only key verifiers/hashes. Scope every REST operation and SSE subscription to its authenticated account. See docs/authentication.md.
 
 ## Security
 
@@ -50,10 +50,20 @@ Before each commit review staged content and verify ignore patterns. Do not prin
 
 The selected repository is https://github.com/sirdobro/nawyki.git and the intended local checkout is C:\Users\mikep\Documents\Prog\nawyki.
 
-Target one provider/VPS for the complete application and PostgreSQL. Hetzner CX23 is the current deployment candidate, not a purchased resource. Serve the built React files through Spring; Node is needed for frontend builds, not as a separate production server.
+Target one provider/VPS for the complete application and PostgreSQL. The user purchased OVHcloud VPS-1 running Ubuntu 26.04 LTS on x86_64, administered as ubuntu using a dedicated SSH key. Read docs/vps-security.md and docs/hosting-setup.md before server changes. The target hostname is nawyki.intmain.cc, with DNS managed at Cloudflare. Serve the built React files through Spring; Node is needed for frontend builds, not as a separate production server.
 
-The desired workflow is GitHub Actions build/test followed by deployment and online manual verification. Hosting has not been provisioned. No credentials, workflow executions, passing checks or live URLs may be assumed.
+The desired workflow is GitHub Actions build/test followed by deployment and online manual verification. The VPS runtime (Docker, private PostgreSQL, Caddy) is installed. DNS and public HTTPS for nawyki.intmain.cc were verified on 2026-10-31; Cloudflare proxy is enabled and independently verified (HTTPS 200, Server: cloudflare, dynamic response). Application code and CI deployment are not yet implemented. No credentials, workflow executions, passing checks or live URLs may be assumed.
 
 Use short-lived branches and reviewable changes. Do not push, provision paid resources, deploy, publish or modify account settings unless authorized. A request for a local commit does not authorize a push.
 
 Do not generate pretend deployment workflows that silently skip required tests. Add executable CI when the application actually builds. Keep docs current as features are implemented, and maintain the course requirements matrix and accurate AI-use record.
+
+## Project work log
+
+For this nawyki project only, maintain C:\Users\mikep\Documents\Studia\projekty\work_log.md after important completed steps. The user explicitly requested ongoing updates. This is not a global preference for unrelated projects.
+
+Record concise chronological entries prefixed `Human:` or `Agent:` with dates where known. Include significant decisions actually approved, implementation milestones, verified tests, commits/pushes, server changes and user-completed account setup. Do not copy the conversation, routine tool calls or unexecuted plans. Never include credentials, access keys, private SSH keys or personal journal data. Preserve existing history and keep the current checkpoint accurate. Distinguish user-reported actions from independently verified results. If access is unavailable, request the narrowly scoped filesystem permission and report any unrecorded updates honestly.
+
+## Keep the stack explainable
+
+The user explicitly asked to avoid unexplained component additions. The user approves industry-standard supporting tools and helpers provided their purpose is explained and documented. Keep docs/tools.md accurate; use concrete needs to limit unnecessary dependencies. This does not reopen the fixed application-stack decisions. Caddy is the already agreed HTTPS proxy; Flyway is the SQL-migration helper explained during the foundation work. Use the approved pull-based deployment: GitHub publishes verified public release images, the VPS pulls them. Never upload an SSH private key to GitHub for this project.

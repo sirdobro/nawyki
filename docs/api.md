@@ -1,5 +1,7 @@
 # Plan API
 
+Zatwierdzono wieloużytkownikowe konta z kluczem dostępu. Do kontraktów dojdą tworzenie konta, wymiana klucza na sesję, wylogowanie, unieważnienie sesji, rotacja klucza, eksport i usunięcie własnego konta. Wszystkie poniższe zasoby i SSE wymagają sesji oraz izolacji kont. 401/403 mają zastosowanie zgodnie z kontraktem; dla cudzego zasobu nie ujawniamy jego istnienia. Szczegóły: authentication.md.
+
 To projekt kontraktów, nie lista istniejących endpointów. Przed implementacją ustalimy schematy JSON i testy kontraktu. Daty: YYYY-MM-DD w strefie użytkownika. Zwykłe odpowiedzi i błędy: JSON; SSE używa text/event-stream z danymi JSON.
 
 | Metoda | Ścieżka | Znaczenie | Planowane odpowiedzi |

@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: nawyki
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    hikari:
+      maximum-pool-size: 5
+  flyway:
+    enabled: true
+server:
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+  forward-headers-strategy: none
+app:
+  release: ${APP_RELEASE:development}

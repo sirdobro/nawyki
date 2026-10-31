@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for verified Nawyki releases every three minutes
+
+[Timer]
+OnBootSec=90s
+OnUnitInactiveSec=3min
+RandomizedDelaySec=10s
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,12 @@
+{
+    admin localhost:2019
+}
+
+nawyki.intmain.cc {
+    header Cache-Control "no-store"
+    header X-Content-Type-Options "nosniff"
+    respond "Nawyki: serwer przygotowany. Aplikacja nie jest jeszcze wdrozona."
+}
+
+# Not activated until DNS points to this VPS. Once an application exists,
+# replace respond with reverse_proxy app:8080; configure immediate SSE flushing.

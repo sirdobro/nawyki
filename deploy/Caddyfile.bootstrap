@@ -1,0 +1,13 @@
+{
+    admin localhost:2019
+    auto_https off
+}
+
+:80 {
+    header Cache-Control "no-store"
+    header X-Content-Type-Options "nosniff"
+    respond "Nawyki: serwer przygotowany. Aplikacja nie jest jeszcze wdrozona."
+}
+
+# Bootstrap only: no credentials or personal information are served over HTTP.
+# Switch to an HTTPS configuration after DNS is verified, before account use.
