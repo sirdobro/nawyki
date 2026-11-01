@@ -3,6 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { api } from './api';
 import './style.css';
 
+// Pasting a bookmark into an already open page can change only the fragment.
+// Restart once so the existing login flow also handles this same-page navigation.
+window.addEventListener('hashchange', () => {
+  if (new URLSearchParams(location.hash.slice(1)).get('access')) location.reload();
+});
+
 const bookmarkKey = new URLSearchParams(location.hash.slice(1)).get('access') || '';
 // Strip the private fragment before requests. Keys stay in memory only.
 if (location.hash) history.replaceState(null, '', location.pathname + location.search);

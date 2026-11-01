@@ -64,6 +64,8 @@ For this nawyki project only, maintain C:\Users\mikep\Documents\Studia\projekty\
 
 Record concise chronological entries prefixed `Human:` or `Agent:` with dates where known. Include significant decisions actually approved, implementation milestones, verified tests, commits/pushes, server changes and user-completed account setup. Do not copy the conversation, routine tool calls or unexecuted plans. Never include credentials, access keys, private SSH keys or personal journal data. Preserve existing history and keep the current checkpoint accurate. Distinguish user-reported actions from independently verified results. If access is unavailable, request the narrowly scoped filesystem permission and report any unrecorded updates honestly.
 
+Do not log side questions or explanation sessions. Keep the log focused on significant project actions and results.
+
 ## Keep the stack explainable
 
 The user explicitly asked to avoid unexplained component additions. The user approves industry-standard supporting tools and helpers provided their purpose is explained and documented. Keep docs/tools.md accurate; use concrete needs to limit unnecessary dependencies. This does not reopen the fixed application-stack decisions. Caddy is the already agreed HTTPS proxy; Flyway is the SQL-migration helper explained during the foundation work. Use the approved pull-based deployment: GitHub publishes verified public release images, the VPS pulls them. Never upload an SSH private key to GitHub for this project.
