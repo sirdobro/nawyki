@@ -37,7 +37,7 @@ Przed pierwszym wdrożeniem potrzebne są: zatwierdzony zakup serwera, adres apl
 
 - Konta zatwierdzone: wiele pseudonimowych kont z kluczem dostępu, bez e-maila i hasła; szczegóły w authentication.md.
 - Cel N dni w pierwszym i ostatnim niepełnym tygodniu.
-- Konkretne wersje Spring Boot, zależności, Node i bibliotek testów właściwości.
+- Wersje narzędzi ustalono i przypięto; bieżąca lista znajduje się w README.
 - VPS OVHcloud oraz domena nawyki.intmain.cc są wybrane; DNS, HTTPS i pierwsza automatyczna publikacja/wdrożenie są zweryfikowane. Bez dodatkowych backupów i monitoringu w MVP.
 
 Nie są to powody do ponownego otwierania ustalonego wyboru języka, bazy ani frontendu.

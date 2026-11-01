@@ -1,40 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { describeStatus } from './status.js';
+import { api } from './api';
 import './style.css';
 
+const bookmarkKey = new URLSearchParams(location.hash.slice(1)).get('access') || '';
+// Strip the private fragment before requests. Keys stay in memory only.
+if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+const days = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+const shift = (date, n) => { const d = new Date(`${date}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const schedule = h => h.scheduleType === 'DAILY' ? 'Codziennie' : h.scheduleType === 'WEEKLY_GOAL' ? `${h.weeklyTarget} dni w tygodniu` : h.days.map(d => days[d - 1]).join(' · ');
 function App() {
-  const [status, setStatus] = useState('loading');
-  const [release, setRelease] = useState('');
-  const [attempt, setAttempt] = useState(0);
+  const [account, setAccount] = useState(null), [boot, setBoot] = useState(true), [busy, setBusy] = useState(false);
+  const [key, setKey] = useState(bookmarkKey), [pending, setPending] = useState(Boolean(bookmarkKey)), [newKey, setNewKey] = useState(''), [saved, setSaved] = useState(false);
+  const [error, setError] = useState(''), [message, setMessage] = useState(''), [view, setView] = useState('today');
+  const [date, setDate] = useState(''), [plan, setPlan] = useState(null), [habits, setHabits] = useState([]), [revision, setRevision] = useState(0), [form, setForm] = useState(false);
+  const [detail, setDetail] = useState(null), [historyDays, setHistoryDays] = useState(null), [proof, setProof] = useState('');
+  async function identify() { const me = await api('/api/auth/me'); setAccount(me.authenticated ? me : null); if (me.authenticated) setDate(me.today); return me; }
+  async function perform(action) { setBusy(true); setError(''); setMessage(''); try { await action(); } catch (e) { setError(e.message); } finally { setBusy(false); } }
+  const refresh = () => setRevision(n => n + 1);
+  function remember(value) { setNewKey(value); setSaved(false); setPending(false); setKey(''); setProof(''); }
+  useEffect(() => { (async () => { try { const me = await identify(); if (bookmarkKey && !me.authenticated) { await api('/api/auth/login', 'POST', { accessKey: bookmarkKey }); setKey(''); setPending(false); await identify(); } } catch (e) { setError(e.message); } finally { setBoot(false); } })(); }, []);
   useEffect(() => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-    setStatus('loading');
-    Promise.all(['/api/health/ready', '/api/status'].map(async (path) => {
-      const response = await fetch(path, { signal: controller.signal, cache: 'no-store' });
-      if (!response.ok) throw new Error('Service unavailable');
-      return response.json();
-    })).then(([health, info]) => {
-      if (health.status !== 'UP' || info.stage !== 'foundation') throw new Error('Unexpected response');
-      setRelease(info.release);
-      setStatus('ready');
-    }).catch(() => setStatus('unavailable')).finally(() => clearTimeout(timeout));
-    return () => { clearTimeout(timeout); controller.abort(); };
-  }, [attempt]);
+    let active = true; setPlan(null);
+    if (account && date) Promise.all([api('/api/habits'), api(`/api/today?date=${date}`)]).then(([all, day]) => { if (active) { setHabits(all.habits); setPlan(day); } }).catch(e => { if (active) setError(e.message); });
+    return () => { active = false; };
+  }, [account, date, revision]);
+  useEffect(() => {
+    let active = true; setHistoryDays(null);
+    if (detail && account) api(`/api/habits/${detail.id}/completions?from=${shift(account.today, -29)}&to=${account.today}`).then(data => { if (active) setHistoryDays(data.dates); }).catch(e => { if (active) setError(e.message); });
+    return () => { active = false; };
+  }, [detail, account, revision]);
+  async function login(e, confirmSwitch = false) { e.preventDefault(); await perform(async () => { await api('/api/auth/login', 'POST', { accessKey: key, confirmSwitch }); setKey(''); setPending(false); setDetail(null); await identify(); }); }
+  async function signOut(all = false) { await perform(async () => { await api(`/api/auth/${all ? 'logout-all' : 'logout'}`, 'POST'); setAccount(null); setDetail(null); setHabits([]); setPlan(null); setNewKey(''); setProof(''); setForm(false); }); }
+  async function mark(h, day, completed) { await perform(async () => { await api(`/api/habits/${h.id}/completions/${day}`, completed ? 'DELETE' : 'PUT'); refresh(); }); }
+  const copy = value => perform(async () => { await navigator.clipboard.writeText(value); setMessage('Skopiowano. Zachowaj w prywatnym miejscu.'); });
   return <div className="shell">
-    <header><a className="brand" href="/" aria-label="Nawyki — strona główna"><span className="brand-mark" aria-hidden="true">n.</span>Nawyki</a><span className="edition">Wersja rozwojowa</span></header>
-    <main>
-      <section className="hero">
-        <p className="eyebrow">TWÓJ DZIENNIK REGULARNOŚCI</p>
-        <h1>Małe kroki.<br/><span>Więcej dobrych dni.</span></h1>
-        <p className="intro">Miejsce na codzienne nawyki, spokojne budowanie regularności i prosty zapis treningów. Bez presji idealnej serii.</p>
-        <div className="connection" role="status" aria-live="polite"><span className={`dot ${status}`} aria-hidden="true"/>{describeStatus(status)}</div>
-        {status === 'unavailable' && <button onClick={() => setAttempt(value => value + 1)}>Sprawdź ponownie</button>}
-      </section>
-      <section className="progress-panel" aria-labelledby="progress-title"><div className="panel-title"><span className="eyebrow">PIERWSZY ETAP</span><span className="phase">01 / fundament</span></div><h2 id="progress-title">Dobre nawyki potrzebują dobrego początku.</h2><p>Podstawy aplikacji są już online. Tworzenie prywatnych dzienników będzie dostępne w kolejnym etapie.</p><ol><li><span className="step-symbol" aria-hidden="true">✓</span><div><strong>Połączenie gotowe</strong><span>Bezpieczny adres, aplikacja i baza danych.</span></div></li><li><span className="step-symbol upcoming" aria-hidden="true">2</span><div><strong>Twój prywatny dziennik</strong><span>W przygotowaniu: dostęp kluczem, bez e-maila i hasła.</span></div></li><li><span className="step-symbol upcoming" aria-hidden="true">3</span><div><strong>Codzienny rytm</strong><span>W przygotowaniu: nawyki, historia i postępy.</span></div></li></ol></section>
-      <section className="principles" aria-label="Założenia aplikacji"><div><span>01</span><h2>Po swojemu</h2><p>Codziennie, w wybrane dni albo kilka razy w tygodniu.</p></div><div><span>02</span><h2>Bez zbędnych danych</h2><p>Planowane konta bez nazwiska, adresu e-mail i hasła.</p></div><div><span>03</span><h2>Prosto i czytelnie</h2><p>Wykonanie, historia i postęp — w jednym miejscu.</p></div></section>
-    </main><footer><span>Nawyki · projekt studencki</span><span>{release && release !== 'development' ? `Wersja ${release.slice(0, 7)}` : 'Środowisko rozwojowe'}</span></footer>
+    <header className="topbar"><a className="brand" href="/"><span className="brand-mark">✓</span> nawyki <span className="edition">wersja rozwojowa</span></a>{account && <button className="quiet" disabled={busy} onClick={() => signOut()}>Wyloguj</button>}</header>
+    {error && <div className="notice error" role="alert">{error}</div>}{message && <div className="notice" role="status">{message}</div>}
+    {boot ? <main><p role="status">Otwieramy dziennik…</p></main> : !account ? <main className="welcome"><section><p className="eyebrow">MAŁE KROKI, WŁASNE TEMPO</p><h1>Zrób miejsce<br />na dobre nawyki.</h1><p className="intro">Zaplanuj, co chcesz robić regularnie. Zaznaczaj wykonane dni i wracaj do swojej historii.</p><p className="muted">Bez e-maila i hasła. Twój prywatny klucz otwiera Twój dziennik.</p></section><section className="panel"><h2>Zacznij od jednego nawyku</h2><p>Utworzymy pusty dziennik i pokażemy klucz dostępu. Zapisz go: bez klucza i aktywnej sesji nie odzyskasz dostępu.</p><button disabled={busy} onClick={() => perform(async () => { const data = await api('/api/accounts', 'POST'); remember(data.accessKey); await identify(); })}>Utwórz mój dziennik</button><hr /><h3>Masz już klucz?</h3><form onSubmit={login}><label>Klucz dostępu<input type="password" required autoComplete="off" spellCheck="false" value={key} onChange={e => setKey(e.target.value)} /></label><button className="secondary" disabled={busy}>Otwórz dziennik</button></form></section></main> : <>
+      {pending && <section className="panel"><h2>Otworzyć dziennik z linku?</h2><p>Masz już aktywną sesję. Link może prowadzić do innego dziennika.</p><div className="actions"><button disabled={busy} onClick={e => login(e, true)}>Otwórz dziennik z linku</button><button className="secondary" onClick={() => { setPending(false); setKey(''); }}>Zostań tutaj</button></div></section>}
+      {newKey ? <main className="panel key-panel"><p className="eyebrow">ZAPISZ ZANIM ZACZNIESZ</p><h1>Twój klucz do dziennika</h1><p>Ten klucz pokażemy tylko teraz. Każdy, kto go ma, może czytać, zmieniać i usunąć Twój dziennik. Nie udostępniaj go publicznie.</p><label>Klucz dostępu<input type="password" readOnly value={newKey} autoComplete="off" /></label><div className="actions"><button disabled={busy} onClick={() => copy(newKey)}>Kopiuj klucz</button><button className="secondary" disabled={busy} onClick={() => copy(`${location.origin}/#access=${newKey}`)}>Kopiuj prywatny link</button></div><p className="muted">Link możesz zapisać w zakładkach. Zakładki mogą synchronizować się z kontem przeglądarki. Sam klucz możesz zapisać w menedżerze haseł.</p><label className="check-label"><input type="checkbox" checked={saved} onChange={e => setSaved(e.target.checked)} />Zapisałem(-am) klucz lub link w bezpiecznym miejscu.</label><button disabled={!saved || busy} onClick={() => setNewKey('')}>Przejdź do dziennika</button></main> : <>
+        <nav aria-label="Dziennik">{[['today', 'Dzisiaj'], ['habits', 'Moje nawyki'], ['access', 'Dostęp i dane']].map(([id, title]) => <button key={id} className={view === id ? 'tab active' : 'tab'} aria-current={view === id ? 'page' : undefined} onClick={() => { setView(id); setDetail(null); setForm(false); }}>{title}</button>)}</nav>
+        <main className="journal">
+          {view === 'today' && <><div className="page-heading"><div><p className="eyebrow">DZIEŃ PO DNIU</p><h1>{date === account.today ? 'Dzisiaj' : 'Twój dzień'}</h1><p className="muted">Jeden mały krok też się liczy.</p></div><button disabled={busy} onClick={() => setForm(!form)}>+ Dodaj nawyk</button></div><div className="date-bar"><button className="secondary" aria-label="Poprzedni dzień" disabled={busy} onClick={() => setDate(shift(date, -1))}>←</button><label>Dzień<input type="date" max={account.today} value={date} disabled={busy} onChange={e => { if (e.target.value && e.target.value <= account.today) setDate(e.target.value); }} /></label><button className="secondary" aria-label="Następny dzień" disabled={busy || date >= account.today} onClick={() => setDate(shift(date, 1))}>→</button>{date !== account.today && <button className="quiet" onClick={() => setDate(account.today)}>Wróć do dzisiaj</button>}</div>
+            {!plan || plan.date !== date ? <p role="status">Wczytywanie…</p> : <><p className="day-summary">{plan.habits.filter(h => h.completed).length} z {plan.habits.length} wykonanych</p><section aria-label="Nawyki na wybrany dzień">{!plan.habits.length && <div className="panel empty"><h2>Tu jest miejsce na mały krok</h2><p>Na ten dzień nie masz zaplanowanych nawyków. Dodaj pierwszy lub zajrzyj do „Moje nawyki”.</p></div>}{plan.habits.map(h => <article className={`habit-row ${h.completed ? 'done' : ''}`} key={h.id}><label className="habit-check"><input type="checkbox" checked={h.completed} disabled={busy} onChange={() => mark(h, date, h.completed)} /><span><strong>{h.name}</strong><small>{schedule(h)}{h.scheduleType === 'WEEKLY_GOAL' && ` · ${h.weekCount}/${h.weeklyTarget} w tym tygodniu`}</small></span></label><button className="quiet" onClick={() => setDetail(h)}>Historia</button></article>)}</section></>}
+          </>}
+          {view === 'habits' && <><div className="page-heading"><div><p className="eyebrow">TWOJE RYTMY</p><h1>Moje nawyki</h1></div><button disabled={busy} onClick={() => setForm(!form)}>+ Dodaj nawyk</button></div>{['Aktywne', 'Archiwum'].map((title, index) => <section key={title}><h2>{title}</h2>{!habits.filter(h => Boolean(h.archivedOn) === Boolean(index)).length && <p className="muted">Brak nawyków.</p>}{habits.filter(h => Boolean(h.archivedOn) === Boolean(index)).map(h => <article className="habit-row" key={h.id}><div><strong>{h.name}</strong><small>{schedule(h)} · od {h.startDate}{h.archivedOn && ` · archiwum od ${h.archivedOn}`}</small></div><div className="actions"><button className="quiet" onClick={() => setDetail(h)}>Historia</button><button className="quiet" disabled={busy} onClick={() => { const name = prompt('Nowa nazwa nawyku', h.name); if (name !== null) perform(async () => { await api(`/api/habits/${h.id}`, 'PATCH', { name }); refresh(); }); }}>Zmień nazwę</button>{!h.archivedOn && <button className="quiet" disabled={busy} onClick={() => { if (confirm('Zarchiwizować nawyk? Historia pozostanie. Od dzisiaj nie będzie można dodawać wykonań.')) perform(async () => { await api(`/api/habits/${h.id}/archive`, 'POST'); setDetail(null); refresh(); }); }}>Archiwizuj</button>}</div></article>)}</section>)}</>}
+          {view === 'access' && <><p className="eyebrow">TWÓJ PRYWATNY DZIENNIK</p><h1>Dostęp i dane</h1><section className="panel"><h2>Sesje i kopia danych</h2><p>Sesja wygasa po 7 dniach bezczynności, najpóźniej po 30 dniach. Klucz pozwala zalogować się ponownie.</p><div className="actions"><button className="secondary" disabled={busy} onClick={() => signOut(true)}>Wyloguj wszystkie urządzenia</button><a className="button secondary" href="/api/account/export" download>Pobierz dane JSON</a></div></section><section className="panel danger-zone"><h2>Zmień klucz lub usuń dziennik</h2><p>Potwierdź aktualnym kluczem. Zmiana unieważni poprzedni klucz i wyloguje inne urządzenia. Usunięcia danych nie można cofnąć.</p><label>Aktualny klucz<input type="password" autoComplete="off" value={proof} onChange={e => setProof(e.target.value)} /></label><div className="actions"><button className="secondary" disabled={busy || !proof} onClick={() => { if (confirm('Zmienić klucz i wylogować inne urządzenia?')) perform(async () => { const data = await api('/api/auth/rotate', 'POST', { accessKey: proof }); remember(data.accessKey); await identify(); }); }}>Wygeneruj nowy klucz</button><button className="danger" disabled={busy || !proof} onClick={() => { if (confirm('Trwale usunąć cały dziennik i wszystkie dane?')) perform(async () => { await api('/api/account', 'DELETE', { accessKey: proof }); setAccount(null); setDetail(null); setProof(''); }); }}>Usuń dziennik i dane</button></div></section></>}
+          {form && <HabitForm today={account.today} busy={busy} onCancel={() => setForm(false)} onSave={draft => perform(async () => { await api('/api/habits', 'POST', draft); setForm(false); refresh(); setMessage('Nawyk dodany.'); })} />}
+          {detail && <section className="panel history-panel"><div className="page-heading"><div><p className="eyebrow">OSTATNIE 30 DNI</p><h2>{detail.name}</h2></div><button className="quiet" onClick={() => setDetail(null)}>Zamknij historię</button></div><p className="muted">Kliknij dzień, aby poprawić wykonanie. Harmonogram określa dostępne dni.</p>{!historyDays ? <p role="status">Wczytywanie historii…</p> : <div className="calendar">{Array.from({ length: 30 }, (_, i) => shift(account.today, i - 29)).map(day => { const completed = historyDays.includes(day), weekday = new Date(`${day}T12:00:00Z`).getUTCDay() || 7; const available = day >= detail.startDate && (!detail.archivedOn || day < detail.archivedOn) && (detail.scheduleType !== 'SELECTED_DAYS' || detail.days.includes(weekday)); return <button key={day} className={completed ? 'calendar-day checked' : 'calendar-day'} disabled={busy || !available} aria-pressed={completed} aria-label={`${day}: ${completed ? 'wykonano' : 'nie wykonano'}`} onClick={() => mark(detail, day, completed)}><small>{day.slice(5)}</small><span>{completed ? '✓' : '·'}</span></button>; })}</div>}</section>}
+        </main>
+      </>}
+    </>}
+    <footer><span>Nawyki · projekt studencki</span><span>Daty: Europe/Warsaw · dane testowe</span></footer>
   </div>;
 }
-createRoot(document.getElementById('root')).render(<App/>);
+function HabitForm({ today, busy, onCancel, onSave }) {
+  const [name, setName] = useState(''), [type, setType] = useState('DAILY'), [selected, setSelected] = useState([]), [target, setTarget] = useState(3), [start, setStart] = useState(today);
+  return <section className="panel form-panel"><h2>Nowy nawyk</h2><form onSubmit={e => { e.preventDefault(); onSave({ name, scheduleType: type, days: selected, weeklyTarget: target, startDate: start }); }}><label>Co chcesz robić?<input autoFocus value={name} maxLength={100} required placeholder="np. Czytać przez 15 minut" onChange={e => setName(e.target.value)} /></label><label>Jak często?<select value={type} onChange={e => setType(e.target.value)}><option value="DAILY">Codziennie</option><option value="SELECTED_DAYS">W wybrane dni tygodnia</option><option value="WEEKLY_GOAL">Określoną liczbę dni w tygodniu</option></select></label>{type === 'SELECTED_DAYS' && <fieldset><legend>Dni tygodnia</legend><div className="weekday-options">{days.map((day, i) => <label className="check-label" key={day}><input type="checkbox" checked={selected.includes(i + 1)} onChange={e => setSelected(e.target.checked ? [...selected, i + 1] : selected.filter(d => d !== i + 1))} />{day}</label>)}</div></fieldset>}{type === 'WEEKLY_GOAL' && <label>Liczba dni w tygodniu<input type="number" min={1} max={7} required value={target} onChange={e => setTarget(Number(e.target.value))} /></label>}<label>Data rozpoczęcia<input type="date" max={today} required value={start} onChange={e => setStart(e.target.value)} /></label><p className="muted">Po utworzeniu możesz zmienić nazwę. Aby zmienić harmonogram, zarchiwizuj nawyk i utwórz nowy.</p><div className="actions"><button disabled={busy}>Dodaj nawyk</button><button type="button" className="secondary" disabled={busy} onClick={onCancel}>Anuluj</button></div></form></section>;
+}
+createRoot(document.getElementById('root')).render(<App />);

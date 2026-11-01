@@ -6,7 +6,7 @@ Wybrano OVHcloud VPS-1: Ubuntu 26.04 LTS, x86_64, około 4 GB RAM i 40 GB dysku.
 
 Bieżący rejestr zabezpieczeń: vps-security.md. Zbudowany React będzie serwowany przez Spring Boot. Docker, Compose, PostgreSQL i bootstrap Caddy zostały zainstalowane 2026-10-31. DNS i publiczny HTTPS zweryfikowano 2026-10-31; proxy Cloudflare jest włączone i zweryfikowane, pierwszy szkielet Java/React został wdrożony jako df4b2f2 (kontynuacja poniżej). Szczegóły i weryfikacja w runtime-installation.md. Nie zamawiamy kolejnego serwera.
 
-Nie dodajemy prywatnego klucza administratora do GitHub Actions. CI otrzyma osobną tożsamość wdrożeniową. Hasło konta ubuntu pozostaje przydatne do konsoli/sudo w razie potrzeby; logowanie SSH hasłem jest wyłączone po sprawdzeniu dostępu kluczem.
+Nie dodajemy prywatnego klucza administratora do GitHub Actions. GitHub publikuje publiczny obraz po testach, VPS pobiera go bez poświadczeń GitHub. Hasło konta ubuntu pozostaje przydatne do konsoli/sudo w razie potrzeby; logowanie SSH hasłem jest wyłączone po sprawdzeniu dostępu kluczem.
 
 ## Cloudflare
 
@@ -19,7 +19,7 @@ Nie dodajemy prywatnego klucza administratora do GitHub Actions. CI otrzyma osob
 
 ## GitHub i dostęp
 
-Przygotujemy workflow, konfigurację Compose i sekretne ustawienia dopiero z działającą aplikacją. Osobny klucz wdrożeniowy, znany/zweryfikowany klucz hosta SSH i sekrety w GitHub Actions. Nie wyłączać sprawdzania klucza hosta. Poświadczenia bazy pozostają na VPS; nie w obrazie Reacta i nie w Git.
+Workflow i Compose są wdrożone. Wybrano pobieranie wydań z VPS, bez klucza SSH i sekretów wdrożeniowych w GitHub Actions. Nie wyłączać sprawdzania klucza hosta. Poświadczenia bazy pozostają na VPS; nie w obrazie Reacta i nie w Git.
 
 Użytkownik może przekazać publiczny IP, wybraną lokalizację/plan i informację, że klucz publiczny został dodany. Prywatne klucze, hasła i tokeny nie należą do czatu. Zakup i zmiany kont muszą być jawnie autoryzowane.
 

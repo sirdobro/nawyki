@@ -52,7 +52,7 @@ Kolejność ćwiczeń i serii jest zachowana. Zapis lub aktualizacja całego tre
 | US-08 | Zobaczyć postęp | Raporty tygodnia i miesiąca wskazują okres, sposób liczenia celu i liczbę treningów. |
 | US-09 | Korzystać w dwóch kartach | Zmiany nawyków/wykonań i treningów aktualizują właściwe widoki przez dwa strumienie SSE. |
 
-Wszystkie historyjki są obecnie planowane, nie zrealizowane.
+Stan etapu kont/nawyków: US-01, US-02 i US-05 zaimplementowane; US-03 pozwala poprawiać historię, ale raporty i serie nie są jeszcze podłączone do widoków. US-04 i US-06–US-09 pozostają do wykonania. Obecny ekran Dzisiaj pokazuje cel tygodniowy jako opis z licznikiem obok nawyku; oddzielna sekcja i pełne statystyki są planowane.
 
 ## Interfejs
 

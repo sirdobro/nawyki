@@ -4,7 +4,7 @@ Projekt semestralny na przedmiot „Programowanie aplikacji internetowych w jęz
 
 ## Stan projektu
 
-Pierwszy szkielet: React serwowany przez Spring MVC, trzy endpointy stanu, PostgreSQL, migracja pustego schematu kont oraz czysta funkcja serii codziennych nawyków. Tworzenie kont, nawyki i treningi nie są jeszcze dostępne. Strona jawnie pokazuje etap rozwojowy i sprawdza gotowość API/bazy.
+Etap kont i nawyków: prywatny dziennik z losowym kluczem (bez e-maila i hasła), sesje, zmiana klucza, eksport/usunięcie danych, trzy harmonogramy nawyków, wykonania, korekty historii, zmiana nazwy i archiwizacja. React jest serwowany przez Spring MVC. Minimalne treningi, serie w interfejsie, statystyki i dwa SSE pozostają do wykonania; nie jest to jeszcze pełny projekt zaliczeniowy.
 
 ## Ustalony stack
 

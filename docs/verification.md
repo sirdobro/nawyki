@@ -28,3 +28,17 @@ Publiczne /api/health/ready zwróciło 200 i UP, a /api/status podało dokładny
 Kontenery app i db były healthy, usługi systemowe bez błędów. Podczas kontroli aplikacja używała około 128 MB pamięci przy limicie 512 MB; to obserwacja fundamentu bez ruchu użytkowników, nie benchmark MVP. Skorygowano powielanie Cache-Control/nosniff na granicy Spring–Caddy i sprawdzono pojedyncze nagłówki przez publiczne HTTPS. Domyślny klient Python urllib otrzymał 403 od warstwy Cloudflare; standardowy curl i przeglądarka działały poprawnie, nie obniżano ochrony Cloudflare.
 
 Github Actions secrets zwróciły pustą listę. Nieużywana para kluczy CI została usunięta lokalnie; klucz administratora pozostał bez zmian. Konto deploy nie otrzymało dostępu SSH ani sudo.
+
+## Konta i nawyki — 2026-11-01
+
+Weryfikacja przed publikacją: Java 21/Maven w kontenerze i osobny PostgreSQL w usuwalnym tmpfs, odrębna sieć od bazy online. Kontener i sieć testowe usunięto po zakończeniu. Frontend: npm ci oraz npm run build zakończone poprawnie.
+
+- DailyStreakTest: 7 testów, w tym 3 właściwości.
+- HabitRulesTest: 5 testów (trzy harmonogramy, niezmienność kolekcji, kumulacja błędów, granice dat i archiwizacji).
+- FoundationApiIT: 4 testy, dostosowane do dwóch migracji, aktywnych kont i odpowiedzi 401 dla prywatnych tras.
+- JournalApiIT: 8 testów integracyjnych z PostgreSQL: CSRF i obcy Origin, ciasteczka, hash klucza, logowanie i świadoma zmiana konta, wylogowanie, izolacja wszystkich tras nawyków/eksportu, harmonogramy/walidacja/historia/archiwum, osiem równoczesnych PUT, rotacja, kasowanie kaskadowe, wygaśnięcie sesji i limit rejestracji.
+- Łącznie 24 testy, bez błędów i pominięć. JaCoCo: 55/55 linii obecnego domain (100%); gate 70% spełniony. To pokrycie istniejących klas, nie miara ukończenia MVP.
+
+Pierwsza próba wykryła niejednoznaczne przeciążenie asercji w nowym teście; poprawiono typ wyniku i powtórzono pełną weryfikację. Wyłączono nieużywaną autokonfigurację konta z generowanym hasłem Springa. Uwierzytelnianie jest wyłącznie naszym kluczem i sesją.
+
+CI, wdrożenie tej wersji i przegląd przeglądarkowy wymagają osobnego potwierdzenia. Pozostały treningi, obliczenia serii tygodniowych/wybranych dni, statystyki, dwa SSE, ich izolacja i testy współbieżnego raportu. Interfejs historii pokazuje 30 dni; API obsługuje zakresy do pięciu lat.

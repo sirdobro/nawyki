@@ -22,14 +22,14 @@ class FoundationApiIT {
         assertEquals("no-store", response.getHeaders().getCacheControl());
     }
 
-    @Test void statusDoesNotPretendAccountCreationExists() {
+    @Test void statusReportsAccountCreationEnabled() {
         var response = http.getForEntity("/api/status", String.class);
         assertEquals(200, response.getStatusCode().value());
-        assertTrue(response.getBody().contains("\"accountCreationEnabled\":false"));
+        assertTrue(response.getBody().contains("\"accountCreationEnabled\":true"));
     }
 
-    @Test void missingApiRouteIsNotReportedAsSuccess() {
-        assertEquals(404, http.getForEntity("/api/not-a-route", String.class).getStatusCode().value());
+    @Test void protectedApiRequiresAuthentication() {
+        assertEquals(401, http.getForEntity("/api/not-a-route", String.class).getStatusCode().value());
     }
 
     @Test void migrationCreatesAnEmptyAccountSchemaAndTransactionsRollback() {
@@ -40,7 +40,7 @@ class FoundationApiIT {
         });
         assertEquals(0L, jdbc.sql("SELECT count(*) FROM account WHERE id=:id")
                 .param("id", id).query(Long.class).single());
-        assertEquals(1L, jdbc.sql("SELECT count(*) FROM flyway_schema_history WHERE success")
+        assertEquals(2L, jdbc.sql("SELECT count(*) FROM flyway_schema_history WHERE success")
                 .query(Long.class).single());
     }
 }
