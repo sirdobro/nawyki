@@ -50,3 +50,13 @@ GitHub run https://github.com/sirdobro/nawyki/actions/runs/41349146520 zakończy
 Publiczny klient testowy otrzymał też CSRF_INVALID po zmianie stanu uwierzytelnienia. Pobranie świeżego tokenu pozwoliło wykonać pełny przepływ konta/nawyku/wykonania/eksportu/wylogowania i ponownego logowania. React już ponawiał raz żądanie po odświeżeniu CSRF; dodatkowo resetuje zapamiętany token po operacjach uwierzytelniania. Nie wyłączano ochrony CSRF ani Cloudflare.
 
 Powtórzono cały zestaw z nowym testem strony głównej: 25 testów (12 jednostkowych/właściwości i 13 integracyjnych), brak błędów/pominięć, gate pokrycia spełniony. Weryfikacja publicznego HTML i interfejsu poprawionej wersji pozostaje do potwierdzenia po publikacji poprawki.
+
+## Ostateczne potwierdzenie etapu kont/nawyków
+
+Poprawka wejścia 4c1d5ad przeszła run https://github.com/sirdobro/nawyki/actions/runs/41349668394 i została wdrożona. Przeglądarka potwierdziła anonimową stronę React, utworzenie pustego dziennika, ukryty klucz z obowiązkowym potwierdzeniem zapisania, formularz nawyku, zapis, odznaczenie i historię. Nie publikowano wartości klucza ani cookie.
+
+Dodatkowy test pola daty ujawnił, że natywne wprowadzenie daty nie synchronizowało stanu formularza. Dodano obsługę onInput obok onChange dla dat rozpoczęcia i planu dnia. Commit f2ab4c9 przeszedł verify i publish w https://github.com/sirdobro/nawyki/actions/runs/41350098088. VPS wdrożył dokładnie f2ab4c974715424687b24a2e8b2c77401464904b; publiczne /api/status potwierdziło release oraz accounts-and-habits. App i db były healthy.
+
+Na tej wersji przeglądarka potwierdziła zapis daty rozpoczęcia 2026-10-29, korektę wykonania w historii dla 2026-10-31 i widoczny zaznaczony nawyk po bezpośrednim wybraniu tego dnia. Sesja przetrwała wdrożenie. Sprawdzono pola wyboru dni tygodnia i układ przy szerokości 390 px: document.scrollWidth <= innerWidth, bez przewijania poziomego; po teście przywrócono domyślny viewport. Konsola nie zawierała błędów ani ostrzeżeń w końcowym przepływie. Nie testowano ręcznie każdej kombinacji wszystkich kontrolek; reguły pokrywają wskazane testy Java/API.
+
+Ponowny publiczny test API potwierdził utworzenie konta/nawyku, idempotentne wykonanie, historię, eksport, wylogowanie/logowanie i zachowane dane. Testowe dzienniki usunięto (API oraz ściśle wskazany rekord testowy przy sprzątaniu po przeglądarce). Nie używano istniejących danych użytkownika, nie przekazano klucza SSH do GitHub i nie zmieniano Cloudflare. Stan końcowy: 25 poprawnych testów, 55/55 linii obecnego rdzenia; aplikacja kont/nawyków online. Treningi, pełne serie/statystyki, SSE i końcowe PDF nadal są otwarte.

@@ -1,5 +1,9 @@
 # Zabezpieczenia VPS i dalsza konfiguracja
 
+## Stan obecny — 2026-11-01
+
+Docker, prywatny PostgreSQL, Caddy i aplikacja kont/nawyków są zainstalowane; DNS, proxy Cloudflare i Full (strict) są zweryfikowane. VPS pobiera przetestowane publiczne wydania. Nie ma klucza SSH ani sekretu wdrożeniowego w GitHub Actions. Poniższy rejestr i pierwotna lista dokumentują wcześniejszy etap zabezpieczeń; szczegóły runtime i wdrożenia są w runtime-installation.md oraz verification.md.
+
 ## Rejestr zmian 2026-10-31
 
 Środowisko: zakupiony OVHcloud VPS-1, Ubuntu 26.04 LTS, x86_64, około 4 GB RAM i 40 GB dysku. Użytkownik administracyjny ubuntu. Dostęp kluczem został sprawdzony przed zmianami i ponownie po restarcie. Adres IP i prywatne dane dostępowe nie są potrzebne w publicznej dokumentacji repozytorium.

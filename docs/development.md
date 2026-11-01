@@ -41,3 +41,7 @@ Przed pierwszym wdrożeniem potrzebne są: zatwierdzony zakup serwera, adres apl
 - VPS OVHcloud oraz domena nawyki.intmain.cc są wybrane; DNS, HTTPS i pierwsza automatyczna publikacja/wdrożenie są zweryfikowane. Bez dodatkowych backupów i monitoringu w MVP.
 
 Nie są to powody do ponownego otwierania ustalonego wyboru języka, bazy ani frontendu.
+
+## Bieżący etap
+
+Etapy 1–4 są wykonane. Konta i podstawowy dziennik nawyków są wdrożone jako f2ab4c9; wyniki i wykryte/poprawione błędy: verification.md. Pozostały serie/raporty, minimalne treningi i dwa SSE, potem wspólna weryfikacja wymagań oraz dokumentacja do oddania. Zasada celu w niepełnym tygodniu pozostaje otwarta przed implementacją serii tygodniowych.

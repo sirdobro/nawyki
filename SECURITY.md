@@ -24,3 +24,7 @@ Nie commitujemy źródłowych materiałów zajęć ani danych autorów bez potrz
 Testy używają wyłącznie osobnej, jednorazowej bazy. Nie stosujemy rzeczywistych sekretów ani prywatnych danych w testach i przykładowych rekordach.
 
 W przypadku ujawnienia sekretu należy go unieważnić lub zmienić. Usunięcie pliku w nowym commicie nie usuwa go z historii. Nie publikuj wartości sekretu w issue ani opisie błędu. Projekt nie ma jeszcze skonfigurowanego prywatnego kanału zgłoszeń; taki kanał należy ustalić przed publicznym uruchomieniem.
+
+## Stan etapu kont i nawyków
+
+Zaimplementowano losowe klucze, hashe w bazie, ograniczone sesje, CSRF/Origin, izolację kont dla nawyków i eksportu oraz ponowne okazanie klucza przy rotacji/usuwaniu. Szczegóły i ograniczenia globalnego limitera: docs/authentication.md. Ciasteczka wymagają HTTPS. Ochrony przyszłych treningów i SSE nie uznajemy za gotowe przed ich implementacją i testami. Publiczny interfejs jest wersją rozwojową z danymi testowymi.
