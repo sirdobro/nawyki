@@ -13,7 +13,7 @@ Podstawa: dostarczona instrukcja lab-script-pl.pdf, punkty 5 i 7.2, oraz szablon
 | 5 | Baza, niemutowalne odwzorowanie, transakcja | PostgreSQL/JDBC, transakcje kont i wykonań, test rollback fundamentu | Częściowo; rollback całego treningu pozostał |
 | 6 | Min. 2 endpointy reaktywne/strumieniowe | Dwa SSE: nawyki i treningi, test dostarczania zmian | Planowane |
 | 7 | Operacja współbieżna bez wspólnego mutowalnego stanu | Niezależne części raportu, dowód współbieżnego wykonania | Planowane |
-| 8 | Testy jednostkowe, min. 3 właściwości, API, min. 70% linii rdzenia | 24 testy, w tym 3 właściwości; 55/55 linii obecnego domain | Spełnione dla obecnego kodu; kolejne moduły wymagają testów |
+| 8 | Testy jednostkowe, min. 3 właściwości, API, min. 70% linii rdzenia | 25 testów, w tym 3 właściwości; 55/55 linii obecnego domain | Spełnione dla obecnego kodu; kolejne moduły wymagają testów |
 | 9 | Instrukcja budowy, uruchomienia i testów | README, Dockerfile, CI, deploy/ i docs/verification.md | Zaimplementowane; kompletna instrukcja oddania pozostała |
 
 ## Plan testów

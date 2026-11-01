@@ -15,6 +15,12 @@ class FoundationApiIT {
     @Autowired JdbcClient jdbc;
     @Autowired TransactionTemplate transaction;
 
+    @Test void anonymousVisitorCanOpenTheReactHomepage() {
+        var response = http.getForEntity("/", String.class);
+        assertEquals(200, response.getStatusCode().value());
+        assertTrue(response.getBody().contains("id=\"root\""));
+    }
+
     @Test void readinessChecksPostgresAndReturnsNoStore() {
         var response = http.getForEntity("/api/health/ready", String.class);
         assertEquals(200, response.getStatusCode().value());

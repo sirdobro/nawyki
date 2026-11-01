@@ -42,3 +42,11 @@ Weryfikacja przed publikacją: Java 21/Maven w kontenerze i osobny PostgreSQL w 
 Pierwsza próba wykryła niejednoznaczne przeciążenie asercji w nowym teście; poprawiono typ wyniku i powtórzono pełną weryfikację. Wyłączono nieużywaną autokonfigurację konta z generowanym hasłem Springa. Uwierzytelnianie jest wyłącznie naszym kluczem i sesją.
 
 CI, wdrożenie tej wersji i przegląd przeglądarkowy wymagają osobnego potwierdzenia. Pozostały treningi, obliczenia serii tygodniowych/wybranych dni, statystyki, dwa SSE, ich izolacja i testy współbieżnego raportu. Interfejs historii pokazuje 30 dni; API obsługuje zakresy do pięciu lat.
+
+## Kontrola publicznej wersji i poprawka wejścia
+
+GitHub run https://github.com/sirdobro/nawyki/actions/runs/41349146520 zakończył verify/publish dla 4b642a3; VPS wdrożył obraz i przeszedł healthcheck. Publiczny test wykrył brak dostępu anonimowego do wewnętrznego forwardu /index.html. Dodano tę konkretną publiczną trasę oraz test wejścia na /, który sprawdza HTML z root Reacta. Nie rozszerzano dostępu do prywatnego API.
+
+Publiczny klient testowy otrzymał też CSRF_INVALID po zmianie stanu uwierzytelnienia. Pobranie świeżego tokenu pozwoliło wykonać pełny przepływ konta/nawyku/wykonania/eksportu/wylogowania i ponownego logowania. React już ponawiał raz żądanie po odświeżeniu CSRF; dodatkowo resetuje zapamiętany token po operacjach uwierzytelniania. Nie wyłączano ochrony CSRF ani Cloudflare.
+
+Powtórzono cały zestaw z nowym testem strony głównej: 25 testów (12 jednostkowych/właściwości i 13 integracyjnych), brak błędów/pominięć, gate pokrycia spełniony. Weryfikacja publicznego HTML i interfejsu poprawionej wersji pozostaje do potwierdzenia po publikacji poprawki.
