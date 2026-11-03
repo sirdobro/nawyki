@@ -26,3 +26,6 @@ Java 21, Spring Boot i Spring MVC z funkcyjnymi trasami, PostgreSQL, JDBC z jawn
 | GitHub Actions | Budowanie, testy i publikacja obrazu. VPS pobiera publiczny obraz; GitHub nie otrzymuje klucza SSH. |
 
 Flyway został dodany na etapie szkieletu, aby uniknąć ręcznego śledzenia zmian schematu. Jego cel i opcjonalność wyjaśniono użytkownikowi. Przed dodaniem kolejnych komponentów należy najpierw wyjaśnić potrzebę, koszt nauki i możliwość wykorzystania istniejących narzędzi.
+
+
+Reguły pól dat mają testy JavaScript w node:test (wbudowany mechanizm Node 24, bez nowej biblioteki). GitHub Actions wykonuje npm test przed buildem Reacta. Testy obejmują polską kolejność, daty nieistniejące, lata przestępne, granice miesiąca/roku oraz ograniczenia przyszłych dat.

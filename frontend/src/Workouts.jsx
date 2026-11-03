@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { api } from './api';
+import DateField from './DateField';
+import { formatDate } from './dates';
 
 const emptySet = () => ({ repetitions: '', weightKg: '' });
 const emptyExercise = () => ({ name: '', sets: [emptySet()] });
 const emptyWorkout = today => ({ date: today, exercises: [emptyExercise()] });
-const readableDate = date => new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${date}T12:00:00Z`));
+const readableDate = date => new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T12:00:00Z`));
 
 export default function Workouts({ today, onDirtyChange }) {
   const [month, setMonth] = useState(today.slice(0, 7));
@@ -76,15 +78,15 @@ export default function Workouts({ today, onDirtyChange }) {
     {error && <div className="notice error" role="alert" ref={errorRef} tabIndex={-1}>{error}</div>}
     {message && <div className="notice" role="status">{message}</div>}
     {editor === null ? <>
-      <label className="workout-month">Miesiąc<input type="month" value={month} max={today.slice(0, 7)} onInput={e => { if (/^\d{4}-\d{2}$/.test(e.currentTarget.value) && e.currentTarget.value <= today.slice(0, 7)) setMonth(e.currentTarget.value); }} onChange={e => { if (/^\d{4}-\d{2}$/.test(e.target.value) && e.target.value <= today.slice(0, 7)) setMonth(e.target.value); }} /></label>
+      <DateField className="workout-month" label="Miesiąc" monthOnly required value={month} max={today.slice(0, 7)} onChange={value => { if (value) setMonth(value); }} />
       {!list ? (error ? <button className="secondary" onClick={() => setRevision(n => n + 1)}>Spróbuj ponownie</button> : <p role="status">Wczytujemy treningi…</p>) : list.length === 0 ? <div className="panel empty"><h2>Jeszcze bez wpisów w tym miesiącu</h2><p>Zapisz ćwiczenia i serie z treningu. Zacznij od jednego ćwiczenia.</p><button onClick={() => open(emptyWorkout(today))}>Dodaj pierwszy trening</button></div> : <div className="workout-list">{list.map(w => <article className="habit-row" key={w.id}>
         <div><h2 className="workout-date">{readableDate(w.date)}</h2><p className="workout-summary">{w.exerciseNames.join(' · ')}</p><small>Serie: {w.setCount} · Ćwiczenia: {w.exerciseNames.length}</small></div>
-        <button className="secondary" aria-label={`Otwórz trening ${w.date}`} disabled={busy} onClick={() => act(async () => open(await api(`/api/workouts/${w.id}`), w.id))}>Otwórz</button>
+        <button className="secondary" aria-label={`Otwórz trening ${formatDate(w.date)}`} disabled={busy} onClick={() => act(async () => open(await api(`/api/workouts/${w.id}`), w.id))}>Otwórz</button>
       </article>)}</div>}
     </> : <form className="panel workout-editor" onSubmit={save}>
       <h2 tabIndex={-1} ref={headingRef}>{editor ? 'Edytuj trening' : 'Nowy trening'}</h2>
       <fieldset disabled={busy} className="workout-fields"><legend className="sr-only">Dane treningu</legend>
-        <label className="workout-date-input">Data treningu<input type="date" required max={today} value={draft.date} onInput={e => setDraft({ ...draft, date: e.currentTarget.value })} onChange={e => setDraft({ ...draft, date: e.target.value })} /></label>
+        <DateField className="workout-date-input" label="Data treningu" required max={today} value={draft.date} onChange={date => setDraft(previous => ({ ...previous, date }))} />
         <p className="muted">Zostaw ciężar pusty, jeśli go nie zapisujesz. Każdy wiersz to jedna seria.</p>
         {draft.exercises.map((exercise, i) => <fieldset className="exercise-card" key={i}>
           <legend>Ćwiczenie {i + 1}</legend>

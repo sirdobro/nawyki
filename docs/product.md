@@ -59,3 +59,6 @@ Stan etapu kont/nawyków: US-01, US-02 i US-05 zaimplementowane; US-03 pozwala p
 Polski język, responsywny układ, czytelne etykiety, obsługa klawiatury i widoczny fokus. Statusy nie mogą zależeć wyłącznie od koloru. Wygodne cele dotykowe około 44 px. Pokazujemy zapis, sukces i błąd z ponowieniem. Nie prezentujemy sukcesu bez potwierdzenia zapisu; ewentualne optymistyczne aktualizacje muszą obsługiwać wycofanie.
 
 Puste widoki prowadzą do pierwszego wpisu. Formularze zachowują dane po błędzie. Usunięcie treningu i archiwizacja wymagają świadomej akcji. Zatwierdzono wiele pseudonimowych kont bez imienia, e-maila i hasła. Losowy klucz dostępu oraz opcjonalna prywatna zakładka służą do logowania; szczegóły w authentication.md.
+
+
+Daty w interfejsie mają jawny polski zapis: DD-MM-RRRR, skróty historii DD-MM, filtr miesiąca MM-RRRR; nazwy miesięcy są polskie. Wspólny komponent DateField udostępnia wpisywanie oraz własny kalendarz z tygodniem od poniedziałku. Nie polegamy na formacie natywnych pól date/month zależnym od przeglądarki. Warstwa API i baza nadal korzystają z ISO YYYY-MM-DD. Ręczny zapis z kropką/ukośnikiem lub bez separatorów jest zawsze interpretowany dzień–miesiąc–rok i normalizowany na DD-MM-RRRR.
