@@ -85,3 +85,11 @@ Użytkownik określił następnie, że testy interfejsu mają odbywać się wył
 
 
 Doprecyzowanie zasad weryfikacji przez użytkownika: ręczne testy wykonuje sam użytkownik w Firefoksie. Agent ma polegać wyłącznie na automatycznych buildach i testach projektu w GitHub Actions; nie sprawdza dostępności przeglądarek, nie prowadzi doraźnych prób UI/API ani dodatkowych lokalnych/VPS sesji testowych bez osobnego polecenia. Zaktualizowano AGENTS.md. Wcześniejsze wpisy pozostają historycznym rejestrem wykonanych sprawdzeń.
+
+## Jednolity polski zapis dat — 2026-11-03
+
+Przegląd źródeł frontendu wykazał zależne od ustawień przeglądarki natywne pola date/month w wyborze dnia, formularzu nawyku, formularzu treningu i filtrze miesiąca oraz surowe etykiety ISO rozpoczęcia/archiwizacji. Zastąpiono je wspólnym DateField: tekst DD-MM-RRRR (miesiąc MM-RRRR), własny polski kalendarz od poniedziałku, jawne limity/walidacja. Historia nadal pokazuje DD-MM; pełne etykiety i dostępnościowe opisy stosują DD-MM-RRRR, tytuły treningów polskie nazwy miesięcy. W listach nawyków daty rozpoczęcia i archiwizacji są również formatowane. Przy niepełnej/błędnej dacie wybranego dnia ukrywane są kontrolki wykonań, aby nie zapisywać na poprzedniej dacie. API/baza nadal używają ISO.
+
+Dodano siedem testów node:test dla formatowania, niejednoznacznych dat dzień–miesiąc, dat nieistniejących, lat przestępnych (w tym 1900/2000), niskich lat, filtrów miesiąca, limitów przyszłości oraz kalendarza na granicy miesięcy/lat. GitHub Actions uruchamia npm test przed buildem. Nie dodano zależności.
+
+Commit fc1a7b4 przeszedł run 41733016130; uzupełniający 5c2cbb5 przeszedł verify/publish w https://github.com/sirdobro/nawyki/actions/runs/41733388196. Zestaw CI obejmuje teraz 7 testów dat JS i dotychczasowe 37 testów Java. Usługa wdrożeniowa VPS potwierdziła wdrożenie 5c2cbb5cb9955bc4843ffbf0200d488954709c1c. Zgodnie z instrukcją użytkownika nie uruchamiano przeglądarek, testów ad hoc UI/API ani dodatkowych lokalnych/VPS sesji testowych. Ręczną akceptację w Firefoksie wykonuje użytkownik.
