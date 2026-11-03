@@ -6,3 +6,15 @@
 
 /* Explicit Polish date fields; browser locale never chooses the visible order. */
 .date-field{position:relative;min-width:0;margin-bottom:18px}.date-field>label{margin:0 0 7px}.date-controls{display:flex;gap:6px;align-items:center}.date-controls input{min-width:0;flex:1;width:100%;font-variant-numeric:tabular-nums}.date-trigger{width:44px;padding:0;flex-shrink:0;font-size:22px}.date-bar .date-field{width:220px;margin:0}.date-bar .date-field>label{font-size:12px}.date-bar .date-controls input{max-width:none}.date-error{display:block;font-size:12px;color:#803622;margin-top:6px}.date-picker{position:absolute;top:100%;left:0;z-index:20;width:320px;max-width:calc(100vw - 96px);margin-top:7px;padding:14px;background:white;border:1px solid #b9c5b2;border-radius:12px;box-shadow:0 10px 30px #26372c22}.picker-heading{display:flex;align-items:center;gap:8px;margin-bottom:12px}.picker-heading label{margin:0;min-width:0;flex:1}.picker-heading input{width:100%;min-width:0}.picker-heading select{padding:9px 6px}.picker-weekdays,.picker-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.picker-weekdays{text-align:center;font-size:12px;color:#5d6b57;margin-bottom:6px}.picker-days button{min-height:44px;padding:5px 0;border-color:transparent;font-size:13px}.picker-days .outside-month{color:#788274;background:#fff}.picker-days button[aria-pressed=true],.picker-months button[aria-pressed=true]{background:#315c40;color:#fff}.picker-months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.picker-months button{font-size:12px;padding:8px 2px}.picker-close{display:flex;margin:10px auto 0;font-size:13px}
+
+/* Align the controls themselves, rather than the date field plus its label. */
+.date-bar { align-items: flex-end; }
+.date-bar > button,
+.date-bar .date-controls > input,
+.date-bar .date-controls > button {
+  height: 48px;
+  min-height: 48px;
+}
+.date-bar .date-field { max-width: calc(100% - 104px); }
+.date-bar .date-error { position: absolute; top: 100%; left: 0; }
+.date-bar:has(.date-error) { padding-bottom: 64px; }
