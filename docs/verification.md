@@ -74,3 +74,11 @@ Dodano WorkoutRulesTest (5 testów) i WorkoutApiIT (7 testów). Powtórzono wery
 Sprawdzono trzy migracje, kolejność wielu ćwiczeń i serii, dokładny ciężar dziesiętny z przecinkiem/kropką, odróżnienie pustego ciężaru od zera, kumulację błędów, daty/limity, pełny CRUD i eksport, cudze identyfikatory, CSRF, usunięcie konta oraz brak automatycznego wykonania nawyku. Wymuszony błąd ograniczenia SQL przy drugiej części treningu wycofał częściowy INSERT; przy edycji odtworzył pierwotną datę, ćwiczenia i serie. Dwa równoczesne PUT pozostawiły jedną kompletną wersję bez mieszania serii. Testy uruchomiono poza bazą online; kontener i sieć testowe zostały usunięte.
 
 Brak nowych bibliotek lub usług. Odczyty/zapisy z jawnym SQL, transakcje/blokady w adapterze. Eksport formatVersion=2 zawiera workouts; istniejące habits nadal są eksportowane. Publikację, wdrożenie i kontrolę przeglądarkową należy potwierdzić osobno.
+
+## Wdrożenie treningów i zakres kontroli interfejsu — 2026-11-03
+
+GitHub run https://github.com/sirdobro/nawyki/actions/runs/41729055565 zakończył verify i publish poprawnie. VPS wdrożył 15eeba6fa74d5a10d6ce8fd0dfc6a2cb5f27e3b4; publiczne /api/status potwierdziło release i stage=habits-and-workouts. Przeprowadzono publiczny test API na dwóch własnych kontach: CRUD, lista, eksport, precyzja/blank kg, zachowanie danych po niepoprawnym PUT i odpowiedzi 404 dla cudzego konta. Wpis API usunięto po teście.
+
+Wstępne próby interfejsu wykonano we wbudowanym podglądzie ChatGPT: dodanie dwóch ćwiczeń i trzech serii z datą 2026-10-31, automatyczny wybór października, ponowny odczyt, komunikat błędu ciężaru z zachowaniem danych, zapis edycji powtórzeń i widok mobilny bez przewijania poziomego. Natywne potwierdzenie porzucenia zmian zablokowało automatykę jednej karty; tej próby nie uznajemy za zakończoną. Kontynuowano odczyt/edycję w oddzielnej karcie podglądu, bez modyfikacji danych użytkownika.
+
+Użytkownik określił następnie, że testy interfejsu mają odbywać się wyłącznie w osobnej, rzeczywistej przeglądarce, nie wewnątrz aplikacji ChatGPT. Zakończono próby w podglądzie i zapisano tę zasadę w AGENTS.md. Opisane próby nie zastępują akceptacji w zwykłej przeglądarce; ta pozostaje do wykonania. Dwa własne konta testowe i ich lokalne poświadczenia usunięto przez API. Nie odczytywano ani nie zmieniano kont użytkownika.
