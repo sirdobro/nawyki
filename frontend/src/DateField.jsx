@@ -2,7 +2,7 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { calendarDays, dateInputError, formatDate, formatMonth, monthNames, parseDateInput } from './dates';
 
 // The visible text and picker are independent of browser/OS date ordering.
-export default function DateField({ label, value, onChange, max, required = false, disabled = false, monthOnly = false, className = '' }) {
+export default function DateField({ label, value, onChange, max, required = false, disabled = false, monthOnly = false, className = '', onValidityChange }) {
   const id = useId();
   const format = monthOnly ? formatMonth : formatDate;
   const [text, setText] = useState(format(value));
@@ -17,7 +17,7 @@ export default function DateField({ label, value, onChange, max, required = fals
   useEffect(() => {
     if (value !== emitted.current) { setText(format(value)); emitted.current = value; setTouched(false); }
   }, [value, monthOnly]);
-  useEffect(() => { input.current?.setCustomValidity(error); }, [error]);
+  useEffect(() => { input.current?.setCustomValidity(error); onValidityChange?.(!error); }, [error, onValidityChange]);
   useEffect(() => {
     if (!open) return;
     const closeOutside = event => { if (!root.current?.contains(event.target)) setOpen(false); };
@@ -54,7 +54,7 @@ export default function DateField({ label, value, onChange, max, required = fals
         {!monthOnly && <label><span className="sr-only">Miesiąc kalendarza</span><select autoFocus value={month} onChange={event => setPickerMonth(`${String(year).padStart(4, '0')}-${String(event.target.value).padStart(2, '0')}`)}>
           {monthNames.map((name, index) => <option key={name} value={index + 1}>{name}</option>)}
         </select></label>}
-        <label><span className={monthOnly ? '' : 'sr-only'}>Rok kalendarza</span><input type="number" min={1} max={lastYear} value={year} autoFocus={monthOnly} onChange={event => {
+        <label><span className={monthOnly ? '' : 'sr-only'}>Rok kalendarza</span><input type="number" onKeyDown={event => { if (event.key === 'Enter') event.preventDefault(); }} min={1} max={lastYear} value={year} autoFocus={monthOnly} onChange={event => {
           const next = Number(event.target.value);
           if (Number.isInteger(next) && next >= 1 && next <= lastYear) setPickerMonth(`${String(next).padStart(4, '0')}-${String(month).padStart(2, '0')}`);
         }} /></label>
