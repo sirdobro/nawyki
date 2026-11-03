@@ -46,7 +46,7 @@ class FoundationApiIT {
         });
         assertEquals(0L, jdbc.sql("SELECT count(*) FROM account WHERE id=:id")
                 .param("id", id).query(Long.class).single());
-        assertEquals(2L, jdbc.sql("SELECT count(*) FROM flyway_schema_history WHERE success")
+        assertEquals(3L, jdbc.sql("SELECT count(*) FROM flyway_schema_history WHERE success")
                 .query(Long.class).single());
     }
 }

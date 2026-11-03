@@ -45,3 +45,6 @@ Nie są to powody do ponownego otwierania ustalonego wyboru języka, bazy ani fr
 ## Bieżący etap
 
 Etapy 1–4 są wykonane. Konta i podstawowy dziennik nawyków są wdrożone jako f2ab4c9; wyniki i wykryte/poprawione błędy: verification.md. Pozostały serie/raporty, minimalne treningi i dwa SSE, potem wspólna weryfikacja wymagań oraz dokumentacja do oddania. Zasada celu w niepełnym tygodniu pozostaje otwarta przed implementacją serii tygodniowych.
+
+
+Dziennik treningów jest zaimplementowany i zweryfikowany w izolowanych testach (37 testów łącznie); stan publikacji i testów online opisuje verification.md. Obejmuje osobną zakładkę, pięć tras REST, V3 schematu i eksport. Statystyki, kompletne serie i SSE pozostają kolejnymi etapami.

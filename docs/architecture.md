@@ -51,3 +51,11 @@ Plan: niezależne podsumowanie nawyków i podsumowanie treningów uruchamiane ws
 ## Transakcje nawyków
 
 Zapis/cofnięcie wykonania i archiwizacja blokują wiersz nawyku SELECT ... FOR UPDATE z zakresem account_id. Po blokadzie ponownie odczytujemy niemutowalny rekord i sprawdzamy reguły. Unikalny klucz (habit_id, completion_date) oraz INSERT ... ON CONFLICT DO NOTHING zapewniają idempotencję także przy równoczesnych żądaniach. Złożony klucz obcy (account_id, habit_id) dodatkowo pilnuje właściciela wykonania. Nie zmieniamy harmonogramu po utworzeniu. Eksport i plan dnia są bieżącymi odczytami, bez gwarancji spójnego snapshotu wielu zapytań przy równoczesnej edycji.
+
+## Minimalny dziennik treningów
+
+WorkoutRules zawiera czyste niemutowalne rekordy i walidację kumulującą błędy. Ciężar to Optional<BigDecimal>; brak ciężaru mapuje się na SQL NULL wyłącznie w adapterze JDBC. V3 dodaje workout, workout_exercise i workout_set, z pozycjami zachowującymi kolejność oraz kaskadowymi kluczami obcymi.
+
+WorkoutRepository.create/replace zapisują całą hierarchię w TransactionTemplate. Edycja blokuje właścicielski wiersz SELECT ... FOR UPDATE, aktualizuje datę, zastępuje ćwiczenia/serie i zatwierdza razem. Błąd dowolnej serii wycofuje również wcześniej zapisane ćwiczenia i zmianę daty. Odczyt szczegółów i eksport blokują nadrzędne wiersze FOR SHARE na czas pobrania dzieci, aby nie mieszać dwóch wersji treningu podczas edycji. Odczyt listy jest pojedynczym zapytaniem SQL. Wygrywa ostatnia zakończona edycja; wersjonowanie konfliktów nie jest zaimplementowane.
+
+Treningi mają odrębną zakładkę React. Formularz utrzymuje wpis po błędzie i ostrzega przed porzuceniem niezapisanych zmian. Usunięcie wpisu wymaga potwierdzenia. Brak powiązania rekordów treningu z rekordami nawyków, nowych bibliotek i usług.

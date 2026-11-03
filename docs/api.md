@@ -2,7 +2,7 @@
 
 Zatwierdzono wieloużytkownikowe konta z kluczem dostępu. Do kontraktów dojdą tworzenie konta, wymiana klucza na sesję, wylogowanie, unieważnienie sesji, rotacja klucza, eksport i usunięcie własnego konta. Wszystkie poniższe zasoby i SSE wymagają sesji oraz izolacji kont. 401/403 mają zastosowanie zgodnie z kontraktem; dla cudzego zasobu nie ujawniamy jego istnienia. Szczegóły: authentication.md.
 
-Zaimplementowano endpointy kont i nawyków opisane poniżej. Wiersze /api/workouts, /api/statistics i /api/events pozostają planem. Daty: YYYY-MM-DD w strefie użytkownika. Zwykłe odpowiedzi i błędy: JSON; SSE używa text/event-stream z danymi JSON.
+Zaimplementowano endpointy kont i nawyków opisane poniżej. Endpointy /api/workouts są także zaimplementowane. Wiersze /api/statistics i /api/events pozostają planem. Daty: YYYY-MM-DD w strefie użytkownika. Zwykłe odpowiedzi i błędy: JSON; SSE używa text/event-stream z danymi JSON.
 
 | Metoda | Ścieżka | Znaczenie | Planowane odpowiedzi |
 |---|---|---|---|
@@ -46,4 +46,14 @@ Poza tworzeniem konta, logowaniem, csrf/me i endpointami stanu trasy wymagają w
 
 POST /api/habits: {name, scheduleType, days, weeklyTarget, startDate}. scheduleType: DAILY, SELECTED_DAYS lub WEEKLY_GOAL. days to liczby 1–7 (poniedziałek–niedziela); weeklyTarget to 1–7 dla celu tygodniowego; pozostałe warianty ignorują nieużywane wartości. startDate jest wymagane i nie może być przyszłe. PATCH przyjmuje {name}. Zmiana harmonogramu nie jest obsługiwana. Obiekt nawyku zawiera id, name, scheduleType, days, weeklyTarget, startDate, archivedOn (pusty tekst oznacza brak archiwizacji). GET /api/habits zwraca {habits:[...]}, GET historii {dates:[YYYY-MM-DD,...]}, GET planu dnia {date,today,habits:[...]} z completed i weekCount. Historia przyjmuje zakres do pięciu lat, domyślnie ostatni miesiąc; interfejs pokazuje ostatnie 30 dni. PUT/DELETE wykonania nie wymagają treści JSON. Zapis dat przyszłych, sprzed rozpoczęcia, niezaplanowanych lub od daty archiwizacji zwraca 422.
 
-Walidacja: {code:"VALIDATION",errors:[{field,message}]}. Pozostałe błędy mają code i opcjonalnie message. Maksymalna odczytywana treść JSON to 16 KiB (400 po przekroczeniu). Nie zwracamy klucza w szczegółach błędu. GET /api/status pokazuje stage=accounts-and-habits i accountCreationEnabled=true.
+Walidacja: {code:"VALIDATION",errors:[{field,message}]}. Pozostałe błędy mają code i opcjonalnie message. Maksymalna odczytywana treść JSON to 16 KiB (400 po przekroczeniu). Nie zwracamy klucza w szczegółach błędu. GET /api/status pokazuje stage=habits-and-workouts i accountCreationEnabled=true.
+
+## Treningi — zaimplementowane
+
+GET /api/workouts?from=YYYY-MM-DD&to=YYYY-MM-DD zwraca {workouts:[{id,date,exerciseNames,setCount}]}, najnowsze daty najpierw. Domyślny zakres: początek bieżącego miesiąca do dzisiaj; do pięciu lat na zapytanie. Interfejs wybiera jeden miesiąc.
+
+POST /api/workouts tworzy cały trening (201); GET /api/workouts/{id} zwraca cały wpis (200); PUT pod tym samym adresem zastępuje go w całości (200); DELETE usuwa cały wpis (200 {deleted:true}). Nieistniejący lub cudzy wpis: 404. Wszystkie trasy wymagają sesji (401), zapisy także CSRF (403). Błędny kształt/JSON/UUID: 400; niepoprawne wartości: 422 z listą {field,message}. Limit JSON 16 KiB.
+
+Treść POST/PUT: {date:"YYYY-MM-DD",exercises:[{name:"Przysiad",sets:[{repetitions:8,weightKg:"40.125"},{repetitions:6,weightKg:""}]}]}. Kolejność tablic jest zachowana. Odpowiedź szczegółowa dodaje id; weightKg jest tekstem dziesiętnym bez zbędnych końcowych zer, pusty tekst oznacza brak ciężaru. Wejście dopuszcza tekst lub liczbę dla powtórzeń/ciężaru; pusty/nieobecny/null ciężar oznacza brak zapisu, zero jest odrębną wartością. Przecinek dziesiętny jest akceptowany w tekście. Daty nie mogą być przyszłe; wymagane 1–30 ćwiczeń, nazwy 1–100 znaków, 1–30 serii na ćwiczenie, całkowite powtórzenia 1–10000 i opcjonalny ciężar 0–9999,999 kg z maksymalnie trzema miejscami dziesiętnymi. Te limity ograniczają pojedynczy wpis, nie opisują zaleceń treningowych.
+
+Tworzenie/edycja są transakcyjne. Edycje tego samego wpisu są serializowane blokadą wiersza; ostatni zatwierdzony zapis zastępuje cały wpis (bez wykrywania konfliktu wersji). Eksport konta ma teraz formatVersion=2 i zawiera także workouts z ćwiczeniami i seriami. Usunięcie konta kaskadowo usuwa treningi. Trening nie zmienia wykonania żadnego nawyku.

@@ -28,7 +28,7 @@ public class FoundationRoutes {
                     }
                 })
                 .GET("/api/status", request -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(Map.of(
-                        "stage", "accounts-and-habits", "release", release,
+                        "stage", "habits-and-workouts", "release", release,
                         "accountCreationEnabled", true)))
                 .build();
     }

@@ -5,6 +5,7 @@ import cc.intmain.nawyki.domain.HabitRules;
 import cc.intmain.nawyki.domain.Schedule;
 import cc.intmain.nawyki.domain.Result;
 import cc.intmain.nawyki.persistence.HabitRepository;
+import cc.intmain.nawyki.persistence.WorkoutRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.Clock;
@@ -33,12 +34,13 @@ import static org.springframework.web.servlet.function.RouterFunctions.route;
 public class JournalRoutes {
     private final AccountService accounts;
     private final HabitRepository habits;
+    private final WorkoutRepository workouts;
     private final ObjectMapper json;
     private final TransactionTemplate transaction;
     private final Clock clock;
-    public JournalRoutes(AccountService accounts, HabitRepository habits, ObjectMapper json,
+    public JournalRoutes(AccountService accounts, HabitRepository habits, WorkoutRepository workouts, ObjectMapper json,
             TransactionTemplate transaction, Clock clock) {
-        this.accounts = accounts; this.habits = habits; this.json = json; this.transaction = transaction; this.clock = clock;
+        this.accounts = accounts; this.habits = habits; this.workouts = workouts; this.json = json; this.transaction = transaction; this.clock = clock;
     }
 
     @Bean RouterFunction<ServerResponse> journalApi() {
@@ -118,7 +120,7 @@ public class JournalRoutes {
         }).toList();
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"nawyki-export.json\"")
-                .body(Map.of("formatVersion", 1, "timeZone", "Europe/Warsaw", "habits", exported));
+                .body(Map.of("formatVersion", 2, "timeZone", "Europe/Warsaw", "habits", exported, "workouts", workouts.export(account).stream().map(WorkoutRoutes::view).toList()));
     }
     private ServerResponse createHabit(ServerRequest request) throws IOException {
         UUID account = requiredAccount(request);

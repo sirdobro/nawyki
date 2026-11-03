@@ -27,4 +27,4 @@ W przypadku ujawnienia sekretu należy go unieważnić lub zmienić. Usunięcie 
 
 ## Stan etapu kont i nawyków
 
-Zaimplementowano losowe klucze, hashe w bazie, ograniczone sesje, CSRF/Origin, izolację kont dla nawyków i eksportu oraz ponowne okazanie klucza przy rotacji/usuwaniu. Szczegóły i ograniczenia globalnego limitera: docs/authentication.md. Ciasteczka wymagają HTTPS. Ochrony przyszłych treningów i SSE nie uznajemy za gotowe przed ich implementacją i testami. Publiczny interfejs jest wersją rozwojową z danymi testowymi.
+Zaimplementowano losowe klucze, hashe w bazie, ograniczone sesje, CSRF/Origin, izolację kont dla nawyków i eksportu oraz ponowne okazanie klucza przy rotacji/usuwaniu. Szczegóły i ograniczenia globalnego limitera: docs/authentication.md. Ciasteczka wymagają HTTPS. Dziennik treningów stosuje te same sesje/CSRF i właścicielski zakres SQL, sprawdzone w WorkoutApiIT. Ochrona przyszłych SSE wymaga osobnej implementacji i testów. Publiczny interfejs jest wersją rozwojową z danymi testowymi.

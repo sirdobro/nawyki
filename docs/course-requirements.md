@@ -6,14 +6,14 @@ Podstawa: dostarczona instrukcja lab-script-pl.pdf, punkty 5 i 7.2, oraz szablon
 
 | Nr | Wymaganie | Planowany dowód | Stan |
 |---|---|---|---|
-| 1 | Niemutowalne typy produktowe/sumacyjne, bez null w dziedzinie | HabitRules, Schedule, Result; kopie kolekcji i Optional | Wdrożone w kodzie nawyków; treningi pozostały |
+| 1 | Niemutowalne typy produktowe/sumacyjne, bez null w dziedzinie | HabitRules, WorkoutRules, Schedule, Result; kopie kolekcji i Optional | Zaimplementowane dla nawyków i treningów |
 | 2 | Czysty rdzeń, efekty na brzegach, jawne zależności | domain: czysta walidacja, DailyStreak i testy bez Springa | Zaimplementowane dla obecnego rdzenia |
 | 3 | Błędy jako wartości, kumulacja błędów | Result i test trzech niezależnych błędów żądania | Zaimplementowane |
-| 4 | Min. 8 REST endpointów JSON, składane trasy/filtry | docs/api.md, JournalRoutes i JournalApiIT | Ponad 8 tras JSON; treningi/raporty pozostały |
-| 5 | Baza, niemutowalne odwzorowanie, transakcja | PostgreSQL/JDBC, transakcje kont i wykonań, test rollback fundamentu | Częściowo; rollback całego treningu pozostał |
+| 4 | Min. 8 REST endpointów JSON, składane trasy/filtry | docs/api.md, JournalRoutes i JournalApiIT | Ponad 8 tras JSON, w tym pięć tras treningów; raporty pozostały |
+| 5 | Baza, niemutowalne odwzorowanie, transakcja | PostgreSQL/JDBC, transakcje kont, wykonań i treningów; test częściowego błędu zapisu i zastępowania treningu | Zaimplementowane dla obecnych zapisów |
 | 6 | Min. 2 endpointy reaktywne/strumieniowe | Dwa SSE: nawyki i treningi, test dostarczania zmian | Planowane |
 | 7 | Operacja współbieżna bez wspólnego mutowalnego stanu | Niezależne części raportu, dowód współbieżnego wykonania | Planowane |
-| 8 | Testy jednostkowe, min. 3 właściwości, API, min. 70% linii rdzenia | 25 testów, w tym 3 właściwości; 55/55 linii obecnego domain | Spełnione dla obecnego kodu; kolejne moduły wymagają testów |
+| 8 | Testy jednostkowe, min. 3 właściwości, API, min. 70% linii rdzenia | 37 testów, w tym 3 właściwości; 86/86 linii obecnego domain | Spełnione dla obecnego kodu; kolejne moduły wymagają testów |
 | 9 | Instrukcja budowy, uruchomienia i testów | README, Dockerfile, CI, deploy/ i docs/verification.md | Zaimplementowane; kompletna instrukcja oddania pozostała |
 
 ## Plan testów
