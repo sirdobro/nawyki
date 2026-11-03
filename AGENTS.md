@@ -68,7 +68,7 @@ Do not log side questions or explanation sessions. Keep the log focused on signi
 
 ## Browser verification
 
-Do not test the application interface inside ChatGPT or its in-app browser/embedded preview. This app is for project work and deployment. Run UI/manual checks separately in a real external browser. Backend/build/automated checks continue in isolated containers and GitHub Actions. Do not treat an embedded-browser check as external-browser verification.
+The user performs manual testing in Firefox. The agent relies exclusively on the project’s automated builds and tests in GitHub Actions for verification. Do not inspect browser availability, launch/control any browser, use ChatGPT’s in-app browser/embedded preview for testing, or perform ad-hoc UI/public-API smoke checks. Do not run additional local/VPS test sessions unless the user explicitly requests them. Continue implementation, documentation and the agreed release deployment; leave manual acceptance to the user.
 
 ## Keep the stack explainable
 
