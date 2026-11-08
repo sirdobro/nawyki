@@ -15,14 +15,14 @@ Nie dodajemy katalogu ćwiczeń, planów, szablonów treningowych, timera, rekor
 
 ## Reguły nawyków
 
-- Harmonogramy: codziennie, niepusty zbiór dni tygodnia albo N różnych dni w tygodniu (1–7).
+- Harmonogramy: codziennie, niepusty zbiór dni tygodnia albo N różnych dni w kolejnych siedmiodniowych okresach od daty rozpoczęcia (1–7).
 - Każdy nawyk ma datę rozpoczęcia. Nazwa jest niepusta po usunięciu zewnętrznych spacji.
 - Jedno wykonanie na nawyk i lokalną datę. Idempotentny zapis; unikalność również w bazie.
 - Nawyk jest binarny. Cele ilościowe pozostają w nazwie, bez pomiaru jednostek.
 - Można uzupełniać historię od daty rozpoczęcia, nie można oznaczać przyszłości. Dla harmonogramu konkretnych dni zapis jest dozwolony tylko w dzień zaplanowany.
 - Dni niezaplanowane nie przerywają serii. Seria codzienna / wybranych dni liczy kolejne wykonane wystąpienia harmonogramu.
 - Dzisiejszy niewykonany termin nie przerywa jeszcze serii z wczoraj; pominięty zamknięty termin już tak.
-- Cel N dni liczy różne daty w tygodniu poniedziałek–niedziela. Nadwyżka jest dozwolona i widoczna jako liczba wykonań, ale realizację celu ograniczamy do 100%.
+- Cel N dni liczy różne daty w stałych okresach siedmiu dni od daty rozpoczęcia nawyku (np. środa–wtorek). Nie jest to ruchome okno ostatnich siedmiu dni. Nadwyżka jest dozwolona i widoczna jako liczba wykonań, ale realizację celu ograniczamy do 100%.
 - Seria celu tygodniowego jest liczona w tygodniach, nie dniach. Nieukończony bieżący tydzień nie jest porażką. Osiągnięty cel bieżącego tygodnia może przedłużyć serię.
 - Nieukończone bieżące okresy pokazujemy jako „w toku”, a nie jako zamknięty wynik. Przyszłe terminy nie wchodzą do mianownika realizacji do dzisiaj.
 - Serie i statystyki wynikają z historii. Nie zapisujemy niezależnego, ręcznie aktualizowanego licznika serii.
@@ -30,7 +30,7 @@ Nie dodajemy katalogu ćwiczeń, planów, szablonów treningowych, timera, rekor
 - Harmonogram nie jest edytowalny w pierwszej wersji. Archiwizacja i nowy nawyk zastępują zmianę reguł historycznych.
 - Archiwizacja zachowuje historię i wyłącza kolejne terminy od lokalnej daty archiwizacji. Korekty wcześniejszych wykonań są dozwolone; nowe wykonania od tej daty nie.
 
-Szczegółowa zasada celu tygodniowego w pierwszym/ostatnim niepełnym tygodniu wymaga doprecyzowania przed implementacją: nie zgadujemy proporcji celu.
+Pierwszy tydzień zawsze trwa siedem dni od daty startu; cel nie jest proporcjonalnie obniżany. Przy archiwizacji nieosiągnięty skrócony ostatni okres ma status PARTIAL i nie przerywa serii; osiągnięty cel zalicza okres. Zamknięty pełny tydzień bez celu przerywa serię. Serie zarchiwizowanych nawyków zatrzymujemy na końcu ich aktywności. Raport kalendarzowego tygodnia (poniedziałek–niedziela) lub miesiąca pokazuje wykonania tylko z wybranego zakresu; osobne wiersze tygodniowych celów pokazują całe siedmiodniowe okresy przecinające zakres, z jawnymi datami. Serie są zawsze liczone z całej historii do dzisiaj, niezależnie od filtra raportu.
 
 ## Minimalny trening siłowy
 
@@ -52,7 +52,7 @@ Kolejność ćwiczeń i serii jest zachowana. Zapis lub aktualizacja całego tre
 | US-08 | Zobaczyć postęp | Raporty tygodnia i miesiąca wskazują okres, sposób liczenia celu i liczbę treningów. |
 | US-09 | Korzystać w dwóch kartach | Zmiany nawyków/wykonań i treningów aktualizują właściwe widoki przez dwa strumienie SSE. |
 
-Stan etapu kont/nawyków: US-01, US-02 i US-05 zaimplementowane; US-03 pozwala poprawiać historię, ale raporty i serie nie są jeszcze podłączone do widoków. US-06 i US-07 są zaimplementowane w osobnej zakładce Treningi; US-04, US-08 i US-09 pozostają do wykonania. Obecny ekran Dzisiaj pokazuje cel tygodniowy jako opis z licznikiem obok nawyku; oddzielna sekcja i pełne statystyki są planowane.
+Stan etapu kont/nawyków: US-01, US-02 i US-05 zaimplementowane; US-03 pozwala poprawiać historię; serie w historii i raport są przeliczane z zapisanych wykonań. US-06 i US-07 są zaimplementowane w osobnej zakładce Treningi; US-04 i US-08 są zaimplementowane (podsumowania i serie), oczekują wyniku CI i ręcznej akceptacji; US-09 pozostaje do wykonania. Ekran Dzisiaj rozdziela zaplanowane terminy i elastyczne cele tygodniowe; pokazuje licznik wraz z datami własnego siedmiodniowego okresu.
 
 ## Interfejs
 

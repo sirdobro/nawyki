@@ -2,6 +2,7 @@ package cc.intmain.nawyki.http;
 
 import cc.intmain.nawyki.application.AccountService;
 import cc.intmain.nawyki.domain.HabitRules;
+import cc.intmain.nawyki.domain.HabitProgress;
 import cc.intmain.nawyki.domain.Schedule;
 import cc.intmain.nawyki.domain.Result;
 import cc.intmain.nawyki.persistence.HabitRepository;
@@ -67,6 +68,9 @@ public class JournalRoutes {
                 .PATCH("/api/habits/{id}", this::renameHabit)
                 .POST("/api/habits/{id}/archive", this::archiveHabit)
                 .GET("/api/habits/{id}/completions", this::history)
+                .GET("/api/habits/{id}/progress", r -> owned(r).map(h -> ok(HabitProgress.calculate(h,
+                        habits.completions(requiredAccount(r), h.id(), h.startDate(), today()), today(), today(), today())))
+                        .orElseGet(JournalRoutes::notFound))
                 .PUT("/api/habits/{id}/completions/{date}", r -> completion(r, true))
                 .DELETE("/api/habits/{id}/completions/{date}", r -> completion(r, false))
                 .GET("/api/today", this::dayPlan)
@@ -182,8 +186,10 @@ public class JournalRoutes {
                 .filter(h -> h.schedule().availableOn(date)).map(h -> {
                     var item = new LinkedHashMap<>(view(h));
                     item.put("completed", !habits.completions(account, h.id(), date, date).isEmpty());
-                    LocalDate monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-                    item.put("weekCount", habits.completions(account, h.id(), monday, monday.plusDays(6)).size());
+                    LocalDate weekStart = HabitProgress.weekStart(h.startDate(), date);
+                    item.put("weekCount", habits.completions(account, h.id(), weekStart, weekStart.plusDays(6)).size());
+                    item.put("weekFrom", weekStart);
+                    item.put("weekTo", weekStart.plusDays(6));
                     return item;
                 }).toList();
         return ok(Map.of("date", date, "today", today(), "habits", items));

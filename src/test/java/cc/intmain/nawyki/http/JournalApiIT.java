@@ -148,4 +148,51 @@ class JournalApiIT {
         jdbc.sql("INSERT INTO auth_rate_bucket(kind,window_start,attempts) VALUES ('create',date_trunc('hour',now()),30)").update();
         assertEquals(429, call(c, HttpMethod.POST, "/api/accounts", Map.of()).getStatusCode().value());
     }
+    @Test void reportsArePrivateCountWorkoutsAndRecalculateAfterHistoryCorrection() {
+        var a = create(); var b = create();
+        String id = habit(a.client(), "DAILY", List.of(), 0);
+        call(a.client(), HttpMethod.PUT, "/api/habits/" + id + "/completions/" + today, Map.of());
+        var workout = call(a.client(), HttpMethod.POST, "/api/workouts", Map.of("date", today.toString(),
+                "exercises", List.of(Map.of("name", "Przysiad", "sets", List.of(Map.of("repetitions", 8))))));
+        assertEquals(201, workout.getStatusCode().value());
+        var report = call(a.client(), HttpMethod.GET, "/api/reports?period=month&date=" + today, null);
+        assertEquals(200, report.getStatusCode().value()); assertEquals(1, report.getBody().get("workoutCount"));
+        var rows = (List<Map<String, Object>>) report.getBody().get("habits");
+        assertEquals(1, rows.size());
+        var progress = (Map<String, Object>) rows.getFirst().get("progress");
+        assertEquals(1, progress.get("completed"));
+        assertEquals(1, ((Map<?, ?>) progress.get("streak")).get("current"));
+        assertEquals(0, call(b.client(), HttpMethod.GET, "/api/reports", null).getBody().get("workoutCount"));
+        assertEquals(List.of(), call(b.client(), HttpMethod.GET, "/api/reports", null).getBody().get("habits"));
+        assertEquals(404, call(b.client(), HttpMethod.GET, "/api/habits/" + id + "/progress", null).getStatusCode().value());
+        assertEquals(401, http.getForEntity("/api/reports", Map.class).getStatusCode().value());
+        call(a.client(), HttpMethod.DELETE, "/api/habits/" + id + "/completions/" + today, Map.of());
+        var recalculated = call(a.client(), HttpMethod.GET, "/api/habits/" + id + "/progress", null).getBody();
+        assertEquals(0, ((Map<?, ?>) recalculated.get("streak")).get("current"));
+        assertEquals(0, ((Map<?, ?>) recalculated.get("streak")).get("best"));
+    }
+    @Test void dayPlanUsesHabitAnchoredWeekRatherThanCalendarMonday() {
+        var a = create();
+        // The first period starts eight days ago; yesterday starts the next one.
+        LocalDate start = today.minusDays(8);
+        var created = call(a.client(), HttpMethod.POST, "/api/habits", Map.of("name", "Ruch", "scheduleType", "WEEKLY_GOAL", "weeklyTarget", 3, "startDate", start.toString()));
+        String id = created.getBody().get("id").toString();
+        for (int offset : List.of(0, 1, 7, 8))
+            assertEquals(200, call(a.client(), HttpMethod.PUT, "/api/habits/" + id + "/completions/" + start.plusDays(offset), Map.of()).getStatusCode().value());
+        var day = call(a.client(), HttpMethod.GET, "/api/today", null).getBody();
+        var row = ((List<Map<String, Object>>) day.get("habits")).getFirst();
+        assertEquals(2, row.get("weekCount")); assertEquals(start.plusDays(7).toString(), row.get("weekFrom"));
+        assertEquals(start.plusDays(13).toString(), row.get("weekTo"));
+        var p = call(a.client(), HttpMethod.GET, "/api/habits/" + id + "/progress", null).getBody();
+        assertEquals(0, ((Map<?, ?>) p.get("streak")).get("current"));
+        assertEquals("WEEKS", ((Map<?, ?>) p.get("streak")).get("unit"));
+    }
+    @Test void reportRejectsInvalidAndFutureFilters() {
+        var a = create();
+        assertEquals(400, call(a.client(), HttpMethod.GET, "/api/reports?date=bad", null).getStatusCode().value());
+        assertEquals(422, call(a.client(), HttpMethod.GET, "/api/reports?period=year", null).getStatusCode().value());
+        assertEquals(422, call(a.client(), HttpMethod.GET, "/api/reports?date=" + today.plusDays(1), null).getStatusCode().value());
+        var week = call(a.client(), HttpMethod.GET, "/api/reports?period=week", null).getBody();
+        assertEquals(today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)).toString(), week.get("from"));
+    }
 }

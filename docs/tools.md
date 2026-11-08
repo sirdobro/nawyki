@@ -29,3 +29,5 @@ Flyway został dodany na etapie szkieletu, aby uniknąć ręcznego śledzenia zm
 
 
 Reguły pól dat mają testy JavaScript w node:test (wbudowany mechanizm Node 24, bez nowej biblioteki). GitHub Actions wykonuje npm test przed buildem Reacta. Testy obejmują polską kolejność, daty nieistniejące, lata przestępne, granice miesiąca/roku oraz ograniczenia przyszłych dat.
+
+Podsumowania: ExecutorService/ThreadPoolExecutor to wbudowane mechanizmy Javy do równoległego wykonania dwóch odczytów i obliczeń raportu. Ograniczamy pulę i kolejkę; brak nowej zależności lub usługi. CyclicBarrier w teście potwierdza, że zadania rzeczywiście działają jednocześnie. Szczegóły: statistics.md.

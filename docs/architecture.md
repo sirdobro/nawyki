@@ -46,7 +46,7 @@ Trening i jego dzieci zapisujemy w jednej transakcji JDBC. Każda operacja wspó
 
 ## Współbieżność
 
-Plan: niezależne podsumowanie nawyków i podsumowanie treningów uruchamiane współbieżnie, następnie składane w raport. Jawny executor, ograniczona liczba zadań, niemutowalne wejścia i wyniki, obsługa błędów i zamykanie zasobów. Można wykorzystać wątki wirtualne Java 21 bez API preview. Implementacja musi pokazać rzeczywiście nakładającą się pracę, nie jedynie opakowanie sekwencji w Future.
+Zaimplementowano (ReportService i ParallelReport; szczegóły w statistics.md): niezależne podsumowanie nawyków i podsumowanie treningów uruchamiane współbieżnie, następnie składane w raport. Jawny executor, ograniczona liczba zadań, niemutowalne wejścia i wyniki, obsługa błędów i zamykanie zasobów. Można wykorzystać wątki wirtualne Java 21 bez API preview. Implementacja musi pokazać rzeczywiście nakładającą się pracę, nie jedynie opakowanie sekwencji w Future.
 
 ## Transakcje nawyków
 

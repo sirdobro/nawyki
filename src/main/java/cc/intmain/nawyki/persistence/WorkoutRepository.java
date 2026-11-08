@@ -23,6 +23,10 @@ public class WorkoutRepository {
     public WorkoutRepository(JdbcClient jdbc, TransactionTemplate transaction) {
         this.jdbc = jdbc; this.transaction = transaction;
     }
+    public int count(UUID account, LocalDate from, LocalDate to) {
+        return jdbc.sql("SELECT count(*) FROM workout WHERE account_id=:account AND workout_date BETWEEN :from AND :to")
+                .param("account", account).param("from", from).param("to", to).query(Integer.class).single();
+    }
     public List<Summary> list(UUID account, LocalDate from, LocalDate to) {
         return jdbc.sql("""
             SELECT w.id,w.workout_date,

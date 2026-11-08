@@ -57,3 +57,12 @@ POST /api/workouts tworzy cały trening (201); GET /api/workouts/{id} zwraca ca�
 Treść POST/PUT: {date:"YYYY-MM-DD",exercises:[{name:"Przysiad",sets:[{repetitions:8,weightKg:"40.125"},{repetitions:6,weightKg:""}]}]}. Kolejność tablic jest zachowana. Odpowiedź szczegółowa dodaje id; weightKg jest tekstem dziesiętnym bez zbędnych końcowych zer, pusty tekst oznacza brak ciężaru. Wejście dopuszcza tekst lub liczbę dla powtórzeń/ciężaru; pusty/nieobecny/null ciężar oznacza brak zapisu, zero jest odrębną wartością. Przecinek dziesiętny jest akceptowany w tekście. Daty nie mogą być przyszłe; wymagane 1–30 ćwiczeń, nazwy 1–100 znaków, 1–30 serii na ćwiczenie, całkowite powtórzenia 1–10000 i opcjonalny ciężar 0–9999,999 kg z maksymalnie trzema miejscami dziesiętnymi. Te limity ograniczają pojedynczy wpis, nie opisują zaleceń treningowych.
 
 Tworzenie/edycja są transakcyjne. Edycje tego samego wpisu są serializowane blokadą wiersza; ostatni zatwierdzony zapis zastępuje cały wpis (bez wykrywania konfliktu wersji). Eksport konta ma teraz formatVersion=2 i zawiera także workouts z ćwiczeniami i seriami. Usunięcie konta kaskadowo usuwa treningi. Trening nie zmienia wykonania żadnego nawyku.
+
+
+## Podsumowania — zaimplementowane
+
+GET /api/reports?period=week|month&date=YYYY-MM-DD: domyślnie bieżący tydzień. Wymaga sesji (401). Zwraca {from,to,today,timeZone,habits:[{id,name,scheduleType,weeklyTarget,progress}],workoutCount}. Niepoprawna data: 400; przyszła data lub inny period: 422; awaria/przeciążenie obliczeń: 503 z komunikatem do ponowienia. Filtr to tydzień poniedziałek–niedziela lub miesiąc kalendarzowy, a nie własny tydzień pojedynczego nawyku.
+
+GET /api/habits/{id}/progress: progress z completed, scheduled, periods i streak; cudzy/nieistniejący: 404. Streak zawiera current, best, unit (OCCURRENCES/WEEKS) i archived. Period: {from,to,completed,target,status}; status MET/MISSED/IN_PROGRESS/PARTIAL. Dla tygodniowych nawyków scheduled=0 (nie jest to mianownik celu); target znajduje się w poszczególnych okresach. completed raportu liczy wyłącznie daty z filtra, a wiersze periods dla tygodni liczą całe własne okresy przecinające filtr. Endpoint pojedynczego nawyku wybiera dzisiaj jako zakres okresów, lecz seria obejmuje całą historię. Patrz statistics.md.
+
+GET /api/today dodaje weekFrom/weekTo; weekCount dotyczy siedmiu dni liczonych od startDate, nie tygodnia kalendarzowego. Pola tygodniowe mają znaczenie dla WEEKLY_GOAL.
