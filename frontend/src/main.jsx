@@ -49,7 +49,7 @@ function App() {
     if (account && date) Promise.all([api('/api/habits'), api(`/api/today?date=${date}`)]).then(([all, day]) => { if (active) { setHabits(all.habits); setPlan(day); setDetail(current => {
       if (!current) return current;
       const updated = all.habits.find(h => h.id === current.id);
-      return updated && JSON.stringify(updated) === JSON.stringify(current) ? current : updated || null;
+      return updated && updated.name === current.name && updated.archivedOn === current.archivedOn ? current : updated || null;
     }); } }).catch(e => { if (active) setError(e.message); });
     return () => { active = false; };
   }, [account, date, revision]);

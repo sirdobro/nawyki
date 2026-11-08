@@ -152,7 +152,7 @@ class JournalStreamsIT {
         assertEquals(401, call(a, HttpMethod.GET, "/api/events/habits", null).getStatusCode().value());
     }
     @Test void expiredSessionsCloseWithoutHeartbeatExtendingIdleLifetime() throws Exception {
-        for (String update : List.of("last_seen_at=now()-interval '8 days'", "expires_at=now()-interval '1 second'")) {
+        for (String update : List.of("last_seen_at=now()-interval '8 days'", "created_at=now()-interval '31 days',expires_at=now()-interval '1 second'")) {
             var a = user(); var h = open(a, "habits");
             jdbc.sql("UPDATE account_session SET " + update + " WHERE account_id=:id").param("id", a.id()).update();
             h.expect("session-ended"); awaitConnections(a, 0);
