@@ -93,3 +93,12 @@ Przegląd źródeł frontendu wykazał zależne od ustawień przeglądarki natyw
 Dodano siedem testów node:test dla formatowania, niejednoznacznych dat dzień–miesiąc, dat nieistniejących, lat przestępnych (w tym 1900/2000), niskich lat, filtrów miesiąca, limitów przyszłości oraz kalendarza na granicy miesięcy/lat. GitHub Actions uruchamia npm test przed buildem. Nie dodano zależności.
 
 Commit fc1a7b4 przeszedł run 41733016130; uzupełniający 5c2cbb5 przeszedł verify/publish w https://github.com/sirdobro/nawyki/actions/runs/41733388196. Zestaw CI obejmuje teraz 7 testów dat JS i dotychczasowe 37 testów Java. Usługa wdrożeniowa VPS potwierdziła wdrożenie 5c2cbb5cb9955bc4843ffbf0200d488954709c1c. Zgodnie z instrukcją użytkownika nie uruchamiano przeglądarek, testów ad hoc UI/API ani dodatkowych lokalnych/VPS sesji testowych. Ręczną akceptację w Firefoksie wykonuje użytkownik.
+
+
+## Podsumowania i serie — 2026-11-08
+
+Commit 31f6093: GitHub Actions https://github.com/sirdobro/nawyki/actions/runs/42473999791 zakończył verify poprawnie. Odczytano rzeczywiste raporty verification-reports: 55 testów Java, zero failures/errors/skipped; JaCoCo domain 121 linii pokrytych, zero pominiętych (100%). npm test (7 testów dat) i build frontendu przeszły w tym samym zadaniu. Dodano 11 testów HabitProgress (w tym dwie właściwości), 4 testy ParallelReport i 3 integracyjne testy podsumowań/okresów w JournalApiIT.
+
+Sprawdzono dni wolne, otwarte terminy, pominięte zamknięte terminy, bieżącą i najlepszą serię, okresy środa–wtorek, nadwyżkę ponad cel, archiwizację i skrócony ostatni okres, duplikaty/kolejność/historię poza harmonogramem, raport bez obcinania serii, izolację kont, licznik treningów, korektę historii i błędne filtry. CyclicBarrier wymaga jednoczesnego rozpoczęcia dwóch zadań; test sprawdza nakładanie pracy bez testowania szybkości. Inne testy obejmują błąd, odrzucenie pracy i przerwanie.
+
+Zgodnie z uzgodnieniem agent nie uruchamiał żadnych testów lokalnych/VPS, przeglądarek ani ad hoc API. Testy integracyjne GitHub Actions używały jednorazowego PostgreSQL, nie bazy online. Ręczna akceptacja układu i obsługi w Firefoksie należy do użytkownika. Dwa SSE nadal nie są zaimplementowane. Publikację/wdrożenie potwierdza się oddzielnie od verify.
