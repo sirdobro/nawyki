@@ -4,7 +4,7 @@ Projekt semestralny na przedmiot „Programowanie aplikacji internetowych w jęz
 
 ## Stan projektu
 
-Etap kont i nawyków: prywatny dziennik z losowym kluczem (bez e-maila i hasła), sesje, zmiana klucza, eksport/usunięcie danych, trzy harmonogramy nawyków, wykonania, korekty historii, zmiana nazwy i archiwizacja. React jest serwowany przez Spring MVC. Dostępny jest osobny minimalny dziennik treningów: data, ćwiczenia, serie z powtórzeniami/opcjonalnym kg, lista miesięczna, edycja/usunięcie i eksport. Podsumowania tygodnia/miesiąca, serie wszystkich harmonogramów i współbieżne składanie raportu są zaimplementowane. Dwa SSE dla nawyków i treningów są zaimplementowane wraz z odświeżaniem widoków; wynik nowego CI i ręczna akceptacja wymagają potwierdzenia. Dokumentacja końcowa i paczka zaliczeniowa pozostają do przygotowania.
+Etap kont i nawyków: prywatny dziennik z losowym kluczem (bez e-maila i hasła), sesje, zmiana klucza, eksport/usunięcie danych, trzy harmonogramy nawyków, wykonania, korekty historii, zmiana nazwy i archiwizacja. React jest serwowany przez Spring MVC. Dostępny jest osobny minimalny dziennik treningów: data, ćwiczenia, serie z powtórzeniami/opcjonalnym kg, lista miesięczna, edycja/usunięcie i eksport. Podsumowania tygodnia/miesiąca, serie wszystkich harmonogramów i współbieżne składanie raportu są zaimplementowane. Dwa SSE dla nawyków i treningów są zaimplementowane wraz z odświeżaniem widoków; CI potwierdził 64 testy Java i 7 JS; ręczna akceptacja pozostaje do wykonania. Dokumentacja końcowa i paczka zaliczeniowa pozostają do przygotowania.
 
 ## Ustalony stack
 

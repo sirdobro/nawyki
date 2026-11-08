@@ -109,3 +109,12 @@ Zgodnie z uzgodnieniem agent nie uruchamiał żadnych testów lokalnych/VPS, prz
 Użytkownik zgłosił miganie listy podczas ręcznych prób w Firefoksie. Przegląd bieżącego kodu i wersji a22e5a7 potwierdził wcześniejsze czyszczenie plan=null przy każdej zmianie revision (zapis wykonania), a następnie zastępowanie listy komunikatem ładowania. Ostatni podział na sekcje mógł uwidocznić ten efekt; nie jest to przeładowanie całego dokumentu.
 
 Usunięto czyszczenie planu, historii i serii podczas odświeżania po zapisie. Reset prywatnych danych pozostaje przy zmianie konta, reset historii przy wyborze innego nawyku; komponent serii ma klucz identyfikatora nawyku. Zmiana daty nadal ukrywa poprzedni plan przez porównanie plan.date z wybraną datą. Poprzedni poprawny widok zostaje podczas pobierania, a serwerowa odpowiedź aktualizuje istniejące elementy. Nie dodano optymistycznego potwierdzania zapisów ani nowych zależności. Wynik builda/testów i ręczna akceptacja poprawki wymagają osobnego potwierdzenia; agent nie uruchamia przeglądarki.
+
+
+## Dwa SSE — 2026-11-08
+
+Implementacja 30cb145 dodała oba strumienie i dziewięć testów JournalStreamsIT. Pierwszy run 42483806630 wykrył jeden błąd fixture: próba ustawienia expires_at przed created_at naruszała session_expiry; publikacja została pominięta. Commit c4a4a6c poprawił fixture absolutnego wygaśnięcia oraz porównywanie metadanych nawyku podczas odświeżania szczegółów.
+
+GitHub Actions https://github.com/sirdobro/nawyki/actions/runs/42483989306 zakończył verify poprawnie. Rzeczywiste XML i jacoco.csv z verification-reports: 64 testy Java, zero failures/errors/skipped, domain 121 pokrytych linii i zero pominiętych (100%). Frontend: 7 testów dat i poprawny build. Nowe testy obejmują oba strumienie HTTP, konto/kanał, REST CRUD, commit/rollback, odłączanie i ready po ponownym połączeniu z pobraniem REST, limit oraz cofnięcie/idle/absolute/rotację/usunięcie sesji.
+
+Nie wykonywano testów lokalnych/VPS, przeglądarek ani ad hoc API. Tylko GitHub Actions z jednorazowym PostgreSQL. Scenariusze ręcznej akceptacji klienta React i połączenia przez Cloudflare w Firefoksie są w sse.md; ten etap należy potwierdzić przez użytkownika. Publikację i wdrożenie sprawdza się oddzielnie od verify.

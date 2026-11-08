@@ -28,7 +28,7 @@ Pakiety domain, application, http i persistence są zaimplementowane dla kont i 
 
 Zatwierdzone konta wieloużytkownikowe dodają account, access_key_verifier i session. Zasoby dziennika mają właściciela; odczyty, zapisy, raporty i SSE zawsze stosują zakres konta z uwierzytelnionej sesji. Szczegóły: authentication.md. Docelowy adres: https://nawyki.intmain.cc.
 
-Zaimplementowane tabele: account, access_key_verifier, account_session, auth_rate_bucket, habit (dni harmonogramu jako integer[]) i habit_completion. Planowane: workout, workout_exercise, workout_set. Obce klucze, kolejność ćwiczeń/serii oraz UNIQUE(habit_id, completion_date). Kształt schematu, ograniczenia i migracje zostaną dopracowane razem z modelem. Option/Optional mapujemy na SQL NULL wyłącznie na granicy, nie wpuszczając null do rdzenia.
+Zaimplementowane tabele: account, access_key_verifier, account_session, auth_rate_bucket, habit (dni harmonogramu jako integer[]) i habit_completion oraz workout, workout_exercise, workout_set. Obce klucze, kolejność ćwiczeń/serii oraz UNIQUE(habit_id, completion_date). Kształt schematu, ograniczenia i migracje zostaną dopracowane razem z modelem. Option/Optional mapujemy na SQL NULL wyłącznie na granicy, nie wpuszczając null do rdzenia.
 
 Trening i jego dzieci zapisujemy w jednej transakcji JDBC. Każda operacja współbieżna korzysta z własnych zasobów; nie przekazujemy wspólnego Connection między zadaniami. Publikacja zmiany do SSE następuje po zatwierdzeniu transakcji. Po ponownym połączeniu klient odświeża stan z REST, aby nie polegać na niezawodności ulotnych zdarzeń.
 
@@ -59,3 +59,7 @@ WorkoutRules zawiera czyste niemutowalne rekordy i walidację kumulującą błę
 WorkoutRepository.create/replace zapisują całą hierarchię w TransactionTemplate. Edycja blokuje właścicielski wiersz SELECT ... FOR UPDATE, aktualizuje datę, zastępuje ćwiczenia/serie i zatwierdza razem. Błąd dowolnej serii wycofuje również wcześniej zapisane ćwiczenia i zmianę daty. Odczyt szczegółów i eksport blokują nadrzędne wiersze FOR SHARE na czas pobrania dzieci, aby nie mieszać dwóch wersji treningu podczas edycji. Odczyt listy jest pojedynczym zapytaniem SQL. Wygrywa ostatnia zakończona edycja; wersjonowanie konfliktów nie jest zaimplementowane.
 
 Treningi mają odrębną zakładkę React. Formularz utrzymuje wpis po błędzie i ostrzega przed porzuceniem niezapisanych zmian. Usunięcie wpisu wymaga potwierdzenia. Brak powiązania rekordów treningu z rekordami nawyków, nowych bibliotek i usług.
+
+## Synchronizacja między kartami
+
+Dwa SSE, publikacja po commit, okresowe sprawdzanie sesji, bounded registry i wątki wirtualne są zaimplementowane w JournalChanges/JournalStreams. Rejestr jest lokalny dla jednej instancji; nie gwarantuje replay zdarzeń. React odbudowuje stan przez REST po każdym ready, zachowując niezapisane formularze. Szczegóły: sse.md.

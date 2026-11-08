@@ -27,4 +27,4 @@ Nie przekazujemy sesji HTTP, JDBC Connection ani kontekstu transakcji między w�
 
 ParallelReportTest używa bariery: oba zadania muszą dotrzeć do niej, zanim którekolwiek się zakończy. Sekwencyjne wykonanie nie przejdzie tego testu. Testy nie polegają na porównywaniu szybkości zegara. Pozostałe testy obejmują awarię, odrzucenie zadania i przerwanie.
 
-SSE nie jest częścią tego etapu. Odświeżenie po własnych korektach wynika z ponownego REST; aktualizacja między kartami pozostaje do następnego kroku.
+Podsumowanie jest podłączone do obu kanałów SSE. Wiadomość lub ponowne połączenie powoduje pobranie aktualnego REST, z zachowaniem widoku podczas odświeżania tego samego zakresu. Szczegóły: sse.md.

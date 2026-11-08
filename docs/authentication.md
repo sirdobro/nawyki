@@ -36,7 +36,7 @@ Tokeny mają 32 losowe bajty zakodowane jako 43 znaki Base64URL bez dopełnienia
 
 Tworzenie kont: globalnie 30 prób na godzinę; logowanie/rotacja/usuwanie: wspólne 120 prób na minutę. Liczniki są atomowe w PostgreSQL i nie zapisują adresów IP. To prosty limit dla demonstracji: jedna osoba może wyczerpać limit wszystkim; nie jest to pełna ochrona przed odmową usługi. Stare liczniki usuwamy podczas kolejnej próby, wygasłe sesje podczas wydawania sesji. Nie dodajemy osobnego systemu monitoringu.
 
-Rotacja i usuwanie ponownie sprawdzają klucz pod blokadą w transakcji. Rotacja unieważnia stare sesje i wydaje jedną nową. Logowanie również blokuje weryfikator, aby nie wydać sesji równolegle ze zmianą klucza. Zasoby nawyków, historia, plan dnia i eksport zawsze filtrują po koncie z sesji. Treningi i SSE pozostają do implementacji; powyższe nie jest deklaracją ich bezpieczeństwa ani ukończenia.
+Rotacja i usuwanie ponownie sprawdzają klucz pod blokadą w transakcji. Rotacja unieważnia stare sesje i wydaje jedną nową. Logowanie również blokuje weryfikator, aby nie wydać sesji równolegle ze zmianą klucza. Zasoby nawyków, historia, plan dnia i eksport zawsze filtrują po koncie z sesji. Treningi i oba SSE są zaimplementowane i objęte testami izolacji kont; SSE dodatkowo sprawdza ważność konkretnej sesji przed powiadomieniem i co 15 sekund, bez aktualizacji last_seen_at. Szczegóły i ograniczenia: sse.md.
 
 ## Link w już otwartej karcie
 
