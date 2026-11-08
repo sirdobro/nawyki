@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api } from './api';
 import Workouts from './Workouts';
+import useJournalEvents from './useJournalEvents';
 import Statistics, { HabitStreak } from './Statistics';
 import DateField from './DateField';
 import { formatDate as displayDate } from './dates';
@@ -26,10 +27,18 @@ function App() {
   const [date, setDate] = useState(''), [plan, setPlan] = useState(null), [habits, setHabits] = useState([]), [revision, setRevision] = useState(0), [form, setForm] = useState(false);
   const [dateValid, setDateValid] = useState(true);
   const [workoutDirty, setWorkoutDirty] = useState(false);
+  const [workoutRevision, setWorkoutRevision] = useState(0);
   const [detail, setDetail] = useState(null), [historyDays, setHistoryDays] = useState(null), [proof, setProof] = useState('');
   async function identify() { const me = await api('/api/auth/me'); setAccount(me.authenticated ? me : null); if (me.authenticated) setDate(me.today); return me; }
   async function perform(action) { setBusy(true); setError(''); setMessage(''); try { await action(); } catch (e) { setError(e.message); } finally { setBusy(false); } }
   const refresh = () => setRevision(n => n + 1);
+  const syncStatus = useJournalEvents(account, refresh, () => setWorkoutRevision(n => n + 1), me => {
+    if (busy || newKey) return; // Do not race a login/key-rotation response or hide a newly issued key.
+    setDetail(null); setForm(false); setProof(''); setNewKey(''); setPending(false); setKey('');
+    setAccount(me.authenticated ? me : null);
+    if (me.authenticated) setDate(me.today);
+    else setMessage('Sesja została zakończona. Zaloguj się ponownie swoim kluczem.');
+  });
   function remember(value) { setNewKey(value); setSaved(false); setPending(false); setKey(''); setProof(''); }
   useEffect(() => { (async () => { try { const me = await identify(); if (bookmarkKey && !me.authenticated) { await api('/api/auth/login', 'POST', { accessKey: bookmarkKey }); setKey(''); setPending(false); await identify(); } } catch (e) { setError(e.message); } finally { setBoot(false); } })(); }, []);
   // Clear private views when their owner changes, not on each background refresh.
@@ -37,7 +46,11 @@ function App() {
   useEffect(() => { setHistoryDays(null); }, [detail, account]);
   useEffect(() => {
     let active = true;
-    if (account && date) Promise.all([api('/api/habits'), api(`/api/today?date=${date}`)]).then(([all, day]) => { if (active) { setHabits(all.habits); setPlan(day); } }).catch(e => { if (active) setError(e.message); });
+    if (account && date) Promise.all([api('/api/habits'), api(`/api/today?date=${date}`)]).then(([all, day]) => { if (active) { setHabits(all.habits); setPlan(day); setDetail(current => {
+      if (!current) return current;
+      const updated = all.habits.find(h => h.id === current.id);
+      return updated && JSON.stringify(updated) === JSON.stringify(current) ? current : updated || null;
+    }); } }).catch(e => { if (active) setError(e.message); });
     return () => { active = false; };
   }, [account, date, revision]);
   useEffect(() => {
@@ -61,14 +74,15 @@ function App() {
             {!dateValid ? <p className="muted" role="status">Podaj poprawną datę lub wybierz ją z kalendarza.</p> : !plan || plan.date !== date ? <p role="status">Wczytywanie…</p> : <><p className="day-summary">{plan.habits.filter(h => h.scheduleType !== 'WEEKLY_GOAL' && h.completed).length} z {plan.habits.filter(h => h.scheduleType !== 'WEEKLY_GOAL').length} zaplanowanych terminów wykonanych</p><section aria-label="Nawyki na wybrany dzień">{!plan.habits.length && <div className="panel empty"><h2>Tu jest miejsce na mały krok</h2><p>Na ten dzień nie masz zaplanowanych nawyków. Dodaj pierwszy lub zajrzyj do „Moje nawyki”.</p></div>}{[false, true].filter(weekly => plan.habits.some(h => (h.scheduleType === 'WEEKLY_GOAL') === weekly)).map(weekly => <section key={String(weekly)}><h2>{weekly ? 'Elastyczne cele tygodniowe' : 'Terminy na wybrany dzień'}</h2>{plan.habits.filter(h => (h.scheduleType === 'WEEKLY_GOAL') === weekly).map(h => <article className={`habit-row ${h.completed ? 'done' : ''}`} key={h.id}><label className="habit-check"><input type="checkbox" checked={h.completed} disabled={busy} onChange={() => mark(h, date, h.completed)} /><span><strong>{h.name}</strong><small>{schedule(h)}{h.scheduleType === 'WEEKLY_GOAL' && ` · ${h.weekCount}/${h.weeklyTarget} w okresie ${displayDate(h.weekFrom)}–${displayDate(h.weekTo)}`}</small></span></label><button className="quiet" onClick={() => setDetail(h)}>Historia</button></article>)}</section>)}</section></>}
           </>}
           {view === 'habits' && <><div className="page-heading"><div><p className="eyebrow">TWOJE RYTMY</p><h1>Moje nawyki</h1></div><button disabled={busy} onClick={() => setForm(!form)}>+ Dodaj nawyk</button></div>{['Aktywne', 'Archiwum'].map((title, index) => <section key={title}><h2>{title}</h2>{!habits.filter(h => Boolean(h.archivedOn) === Boolean(index)).length && <p className="muted">Brak nawyków.</p>}{habits.filter(h => Boolean(h.archivedOn) === Boolean(index)).map(h => <article className="habit-row" key={h.id}><div><strong>{h.name}</strong><small>{schedule(h)} · od {displayDate(h.startDate)}{h.archivedOn && ` · archiwum od ${displayDate(h.archivedOn)}`}</small></div><div className="actions"><button className="quiet" onClick={() => setDetail(h)}>Historia</button><button className="quiet" disabled={busy} onClick={() => { const name = prompt('Nowa nazwa nawyku', h.name); if (name !== null) perform(async () => { await api(`/api/habits/${h.id}`, 'PATCH', { name }); refresh(); }); }}>Zmień nazwę</button>{!h.archivedOn && <button className="quiet" disabled={busy} onClick={() => { if (confirm('Zarchiwizować nawyk? Historia pozostanie. Od dzisiaj nie będzie można dodawać wykonań.')) perform(async () => { await api(`/api/habits/${h.id}/archive`, 'POST'); setDetail(null); refresh(); }); }}>Archiwizuj</button>}</div></article>)}</section>)}</>}
-          {view === 'workouts' && <Workouts key={account.accountId} today={account.today} onDirtyChange={setWorkoutDirty} />}
-          {view === 'statistics' && <Statistics key={account.accountId} today={account.today} revision={revision} />}
+          {view === 'workouts' && <Workouts key={account.accountId} today={account.today} onDirtyChange={setWorkoutDirty} externalRevision={workoutRevision} />}
+          {view === 'statistics' && <Statistics key={account.accountId} today={account.today} revision={revision + workoutRevision} />}
           {view === 'access' && <><p className="eyebrow">TWÓJ PRYWATNY DZIENNIK</p><h1>Dostęp i dane</h1><section className="panel"><h2>Sesje i kopia danych</h2><p>Sesja wygasa po 7 dniach bezczynności, najpóźniej po 30 dniach. Klucz pozwala zalogować się ponownie.</p><div className="actions"><button className="secondary" disabled={busy} onClick={() => signOut(true)}>Wyloguj wszystkie urządzenia</button><a className="button secondary" href="/api/account/export" download>Pobierz dane JSON</a></div></section><section className="panel danger-zone"><h2>Zmień klucz lub usuń dziennik</h2><p>Potwierdź aktualnym kluczem. Zmiana unieważni poprzedni klucz i wyloguje inne urządzenia. Usunięcia danych nie można cofnąć.</p><label>Aktualny klucz<input type="password" autoComplete="off" value={proof} onChange={e => setProof(e.target.value)} /></label><div className="actions"><button className="secondary" disabled={busy || !proof} onClick={() => { if (confirm('Zmienić klucz i wylogować inne urządzenia?')) perform(async () => { const data = await api('/api/auth/rotate', 'POST', { accessKey: proof }); remember(data.accessKey); await identify(); }); }}>Wygeneruj nowy klucz</button><button className="danger" disabled={busy || !proof} onClick={() => { if (confirm('Trwale usunąć cały dziennik i wszystkie dane?')) perform(async () => { await api('/api/account', 'DELETE', { accessKey: proof }); setAccount(null); setDetail(null); setProof(''); }); }}>Usuń dziennik i dane</button></div></section></>}
           {form && <HabitForm today={account.today} busy={busy} onCancel={() => setForm(false)} onSave={draft => perform(async () => { await api('/api/habits', 'POST', draft); setForm(false); refresh(); setMessage('Nawyk dodany.'); })} />}
           {detail && <section className="panel history-panel"><div className="page-heading"><div><p className="eyebrow">OSTATNIE 30 DNI</p><h2>{detail.name}</h2></div><button className="quiet" onClick={() => setDetail(null)}>Zamknij historię</button></div><HabitStreak key={detail.id} id={detail.id} revision={revision} /><p className="muted">Kliknij dzień, aby poprawić wykonanie. Harmonogram określa dostępne dni.</p>{!historyDays ? <p role="status">Wczytywanie historii…</p> : <div className="calendar">{Array.from({ length: 30 }, (_, i) => shift(account.today, i - 29)).map(day => { const completed = historyDays.includes(day), weekday = new Date(`${day}T12:00:00Z`).getUTCDay() || 7; const available = day >= detail.startDate && (!detail.archivedOn || day < detail.archivedOn) && (detail.scheduleType !== 'SELECTED_DAYS' || detail.days.includes(weekday)); return <button key={day} className={completed ? 'calendar-day checked' : 'calendar-day'} disabled={busy || !available} aria-pressed={completed} aria-label={`${displayDate(day)}: ${completed ? 'wykonano' : 'nie wykonano'}`} onClick={() => mark(detail, day, completed)}><small>{displayDate(day).slice(0, 5)}</small><span>{completed ? '✓' : '·'}</span></button>; })}</div>}</section>}
         </main>
       </>}
     </>}
+    {account && <p className="sync-status" role="status">{syncStatus === 'live' ? 'Synchronizacja aktywna' : syncStatus === 'limited' ? 'Za dużo otwartych kart. Zamknij część z nich i odśwież stronę.' : syncStatus === 'reconnecting' ? 'Synchronizacja przerwana. Ponawiamy połączenie…' : 'Łączenie synchronizacji…'}</p>}
     <footer><span>Nawyki · projekt studencki</span><span>Daty: Europe/Warsaw · dane testowe</span></footer>
   </div>;
 }

@@ -1,6 +1,7 @@
 package cc.intmain.nawyki.persistence;
 
 import cc.intmain.nawyki.domain.WorkoutRules.*;
+import cc.intmain.nawyki.application.JournalChanges;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -20,8 +21,9 @@ public class WorkoutRepository {
     private record Header(UUID id, LocalDate date) {}
     private final JdbcClient jdbc;
     private final TransactionTemplate transaction;
-    public WorkoutRepository(JdbcClient jdbc, TransactionTemplate transaction) {
-        this.jdbc = jdbc; this.transaction = transaction;
+    private final JournalChanges changes;
+    public WorkoutRepository(JdbcClient jdbc, TransactionTemplate transaction, JournalChanges changes) {
+        this.jdbc = jdbc; this.transaction = transaction; this.changes = changes;
     }
     public int count(UUID account, LocalDate from, LocalDate to) {
         return jdbc.sql("SELECT count(*) FROM workout WHERE account_id=:account AND workout_date BETWEEN :from AND :to")
@@ -53,6 +55,7 @@ public class WorkoutRepository {
             jdbc.sql("INSERT INTO workout(id,account_id,workout_date) VALUES (:id,:account,:date)")
                     .param("id", id).param("account", account).param("date", workout.date()).update();
             writeExercises(id, workout.exercises());
+            changes.workouts(account);
             return new Stored(id, workout);
         });
     }
@@ -63,12 +66,15 @@ public class WorkoutRepository {
                     .param("date", workout.date()).param("account", account).param("id", id).update();
             jdbc.sql("DELETE FROM workout_exercise WHERE workout_id=:id").param("id", id).update();
             writeExercises(id, workout.exercises());
+            changes.workouts(account);
             return true;
         });
     }
     public boolean delete(UUID account, UUID id) {
-        return jdbc.sql("DELETE FROM workout WHERE account_id=:account AND id=:id")
+        boolean deleted = jdbc.sql("DELETE FROM workout WHERE account_id=:account AND id=:id")
                 .param("account", account).param("id", id).update() == 1;
+        if (deleted) changes.workouts(account);
+        return deleted;
     }
     private boolean lock(UUID account, UUID id) {
         return jdbc.sql("SELECT id FROM workout WHERE account_id=:account AND id=:id FOR UPDATE")

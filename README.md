@@ -4,7 +4,7 @@ Projekt semestralny na przedmiot „Programowanie aplikacji internetowych w jęz
 
 ## Stan projektu
 
-Etap kont i nawyków: prywatny dziennik z losowym kluczem (bez e-maila i hasła), sesje, zmiana klucza, eksport/usunięcie danych, trzy harmonogramy nawyków, wykonania, korekty historii, zmiana nazwy i archiwizacja. React jest serwowany przez Spring MVC. Dostępny jest osobny minimalny dziennik treningów: data, ćwiczenia, serie z powtórzeniami/opcjonalnym kg, lista miesięczna, edycja/usunięcie i eksport. Podsumowania tygodnia/miesiąca, serie wszystkich harmonogramów i współbieżne składanie raportu są zaimplementowane. Dwa SSE pozostają do wykonania; nie jest to jeszcze pełny projekt zaliczeniowy.
+Etap kont i nawyków: prywatny dziennik z losowym kluczem (bez e-maila i hasła), sesje, zmiana klucza, eksport/usunięcie danych, trzy harmonogramy nawyków, wykonania, korekty historii, zmiana nazwy i archiwizacja. React jest serwowany przez Spring MVC. Dostępny jest osobny minimalny dziennik treningów: data, ćwiczenia, serie z powtórzeniami/opcjonalnym kg, lista miesięczna, edycja/usunięcie i eksport. Podsumowania tygodnia/miesiąca, serie wszystkich harmonogramów i współbieżne składanie raportu są zaimplementowane. Dwa SSE dla nawyków i treningów są zaimplementowane wraz z odświeżaniem widoków; wynik nowego CI i ręczna akceptacja wymagają potwierdzenia. Dokumentacja końcowa i paczka zaliczeniowa pozostają do przygotowania.
 
 ## Ustalony stack
 
@@ -21,6 +21,7 @@ Wersje: Spring Boot 3.5.16, Flyway 11.20.3, Maven 3.9.11, React 19.3.1, Vite 8.3
 
 - [Narzędzia i ich proste wyjaśnienie](docs/tools.md)
 - [Zakres i reguły produktu](docs/product.md)
+- [Synchronizacja SSE i scenariusze ręcznej weryfikacji](docs/sse.md)
 - [Architektura i decyzje](docs/architecture.md)
 - [Plan API](docs/api.md)
 - [Wymagania zajęć i plan testów](docs/course-requirements.md)

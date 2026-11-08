@@ -58,6 +58,16 @@ public class AccountService {
     public void logout(String token) {
         jdbc.sql("DELETE FROM account_session WHERE verifier_hash=:hash").param("hash", tokens.hash(token)).update();
     }
+    /** Validate an existing stream without extending idle expiry or retaining its raw cookie. */
+    public boolean streamSessionValid(UUID account, String verifierHash) {
+        return jdbc.sql("""
+            SELECT count(*) FROM account_session WHERE account_id=:id AND verifier_hash=:hash
+            AND expires_at>:now AND last_seen_at>:cutoff
+            """).param("id", account).param("hash", verifierHash)
+                .param("now", java.sql.Timestamp.from(clock.instant()))
+                .param("cutoff", java.sql.Timestamp.from(clock.instant().minus(Duration.ofDays(7))))
+                .query(Integer.class).single() == 1;
+    }
     public void logoutAll(UUID id) {
         jdbc.sql("DELETE FROM account_session WHERE account_id=:id").param("id", id).update();
     }

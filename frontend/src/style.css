@@ -25,3 +25,5 @@
 .report-week>span{display:block;font-size:14px;margin-bottom:7px}.report-week-range{font-size:14px;font-variant-numeric:tabular-nums}.report-week .actions{gap:8px}.report-week button{min-width:44px}
 
 .workout-preview{max-width:760px}.workout-preview-exercise{margin-top:28px}.workout-preview-exercise h3{overflow-wrap:anywhere;margin-bottom:10px}.workout-preview table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}.workout-preview th,.workout-preview td{text-align:left;padding:10px 8px;border-bottom:1px solid #e6e9e1}.workout-preview thead th{color:#5d6b57;font-size:12px;font-weight:550}.workout-preview tbody th{font-weight:400}.workout-preview h2:focus{outline:none}@media(max-width:540px){.workout-preview th,.workout-preview td{padding:10px 5px}}
+
+.sync-status{color:#5d6b57;font-size:12px;margin:0 0 14px}

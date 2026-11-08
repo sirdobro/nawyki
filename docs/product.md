@@ -52,7 +52,7 @@ Kolejność ćwiczeń i serii jest zachowana. Zapis lub aktualizacja całego tre
 | US-08 | Zobaczyć postęp | Raporty tygodnia i miesiąca wskazują okres, sposób liczenia celu i liczbę treningów. |
 | US-09 | Korzystać w dwóch kartach | Zmiany nawyków/wykonań i treningów aktualizują właściwe widoki przez dwa strumienie SSE. |
 
-Stan etapu kont/nawyków: US-01, US-02 i US-05 zaimplementowane; US-03 pozwala poprawiać historię; serie w historii i raport są przeliczane z zapisanych wykonań. US-06 i US-07 są zaimplementowane w osobnej zakładce Treningi; US-04 i US-08 są zaimplementowane (podsumowania i serie), potwierdzone w CI 42473999791, oczekują ręcznej akceptacji; US-09 pozostaje do wykonania. Ekran Dzisiaj rozdziela zaplanowane terminy i elastyczne cele tygodniowe; pokazuje licznik wraz z datami własnego siedmiodniowego okresu.
+Stan etapu kont/nawyków: US-01, US-02 i US-05 zaimplementowane; US-03 pozwala poprawiać historię; serie w historii i raport są przeliczane z zapisanych wykonań. US-06 i US-07 są zaimplementowane w osobnej zakładce Treningi; US-04 i US-08 są zaimplementowane (podsumowania i serie), potwierdzone w CI 42473999791, oczekują ręcznej akceptacji; US-09 jest zaimplementowane w dwóch kanałach SSE, oczekuje wyniku CI i ręcznej akceptacji. Ekran Dzisiaj rozdziela zaplanowane terminy i elastyczne cele tygodniowe; pokazuje licznik wraz z datami własnego siedmiodniowego okresu.
 
 ## Interfejs
 
@@ -66,3 +66,5 @@ Daty w interfejsie mają jawny polski zapis: DD-MM-RRRR, skróty historii DD-MM,
 Usprawnienia formularzy: Podsumowanie wybiera miesiąc bezpośrednio, a tydzień strzałkami z jawnym zakresem dat. Dodaj serię kopiuje powtórzenia i opcjonalny ciężar z ostatniej serii tego samego ćwiczenia do nowego, niezależnie edytowalnego wiersza (również przy edycji treningu). Nowe ćwiczenie nadal zaczyna od pustej serii.
 
 Treningi: Otwórz prowadzi do podglądu zapisanej daty, ćwiczeń i serii w tabelach, bez pól formularza. Edytuj otwiera formularz dopiero na żądanie. Anulowanie edycji przywraca niezmieniony podgląd, udany zapis pokazuje podgląd odpowiedzi serwera (także po utworzeniu nowego treningu). Wróć do listy zachowuje wybrany miesiąc; usunięcie z formularza wraca do listy. Pusty ciężar opisujemy jako Nie zapisano, zero pozostaje widoczne.
+
+Dwa SSE odświeżają tylko dane zalogowanego konta. Podsumowanie reaguje na oba kanały. Własne i zdalne aktualizacje zachowują widok podczas pobierania; otwarty formularz treningu nie jest nadpisywany. Szczegóły i scenariusze akceptacji: sse.md.

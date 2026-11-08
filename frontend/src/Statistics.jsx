@@ -26,10 +26,11 @@ export default function Statistics({ today, revision }) {
   const [period, setPeriod] = useState('week'), [date, setDate] = useState(today), [valid, setValid] = useState(true);
   const [data, setData] = useState(null), [error, setError] = useState(''), [retry, setRetry] = useState(0);
   useEffect(() => {
-    let active = true; setData(null); setError('');
+    let active = true; setError('');
     if (valid) api(`/api/reports?period=${period}&date=${date}`).then(value => { if (active) setData(value); }).catch(e => { if (active) setError(e.message); });
     return () => { active = false; };
   }, [period, date, valid, revision, retry]);
+  useEffect(() => { setData(null); }, [period, date, valid]);
   return <section aria-labelledby="statistics-title"><div className="page-heading"><div><p className="eyebrow">TWOJA REGULARNOŚĆ</p><h1 id="statistics-title">Podsumowanie</h1></div></div>
     <div className="report-filters"><label>Zakres<select value={period} onChange={e => { setPeriod(e.target.value); setValid(true); }}><option value="week">Tydzień</option><option value="month">Miesiąc</option></select></label>
       {period === 'month' ? <DateField key={`month-${retry}`} label="Miesiąc" monthOnly value={date.slice(0, 7)} onChange={value => { if (value) setDate(`${value}-01`); }} max={today.slice(0, 7)} required onValidityChange={setValid} />

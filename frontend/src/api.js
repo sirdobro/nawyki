@@ -9,7 +9,7 @@ export async function api(path, method = 'GET', body, retry = true) {
   const response = await fetch(path, { method, headers, credentials: 'same-origin', cache: 'no-store', body: body === undefined ? undefined : JSON.stringify(body) });
   const data = await response.json().catch(() => ({}));
   if (response.status === 403 && data.code === 'CSRF_INVALID' && retry) { csrf = undefined; return api(path, method, body, false); }
-  if (!response.ok) throw Error(data.errors?.map(e => e.message).join(' ') || data.message || (response.status === 401 ? 'Sesja wygasła lub klucz jest niepoprawny. Zaloguj się ponownie.' : 'Nie udało się wykonać operacji. Spróbuj ponownie.'));
+  if (!response.ok) { const error = Error(data.errors?.map(e => e.message).join(' ') || data.message || (response.status === 401 ? 'Sesja wygasła lub klucz jest niepoprawny. Zaloguj się ponownie.' : 'Nie udało się wykonać operacji. Spróbuj ponownie.')); error.status = response.status; throw error; }
   if (method !== 'GET' && (path.startsWith('/api/auth/') || path === '/api/accounts' || path === '/api/account')) csrf = undefined;
   return data;
 }

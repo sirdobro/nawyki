@@ -66,3 +66,8 @@ GET /api/reports?period=week|month&date=YYYY-MM-DD: domyślnie bieżący tydzie�
 GET /api/habits/{id}/progress: progress z completed, scheduled, periods i streak; cudzy/nieistniejący: 404. Streak zawiera current, best, unit (OCCURRENCES/WEEKS) i archived. Period: {from,to,completed,target,status}; status MET/MISSED/IN_PROGRESS/PARTIAL. Dla tygodniowych nawyków scheduled=0 (nie jest to mianownik celu); target znajduje się w poszczególnych okresach. completed raportu liczy wyłącznie daty z filtra, a wiersze periods dla tygodni liczą całe własne okresy przecinające filtr. Endpoint pojedynczego nawyku wybiera dzisiaj jako zakres okresów, lecz seria obejmuje całą historię. Patrz statistics.md.
 
 GET /api/today dodaje weekFrom/weekTo; weekCount dotyczy siedmiu dni liczonych od startDate, nie tygodnia kalendarzowego. Pola tygodniowe mają znaczenie dla WEEKLY_GOAL.
+
+
+## SSE — zaimplementowane
+
+GET /api/events/habits oraz GET /api/events/workouts: uwierzytelniony text/event-stream, event ready/changed z {refresh:true}, session-ended lub limit z {refresh:false}. Nie zawierają danych dziennika. 401 bez sesji, 429 po przekroczeniu limitu. Wznowienie zawsze wymaga pobrania aktualnego REST po ready; brak replay/Last-Event-ID. Heartbeat, limity, sprawdzanie sesji i zasady formularzy: sse.md.

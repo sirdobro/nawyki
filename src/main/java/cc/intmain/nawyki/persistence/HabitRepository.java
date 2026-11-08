@@ -1,6 +1,7 @@
 package cc.intmain.nawyki.persistence;
 
 import cc.intmain.nawyki.domain.HabitRules;
+import cc.intmain.nawyki.application.JournalChanges;
 import cc.intmain.nawyki.domain.Schedule;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class HabitRepository {
     private final JdbcClient jdbc;
-    public HabitRepository(JdbcClient jdbc) { this.jdbc = jdbc; }
+    private final JournalChanges changes;
+    public HabitRepository(JdbcClient jdbc, JournalChanges changes) { this.jdbc = jdbc; this.changes = changes; }
 
     public List<HabitRules.Habit> list(UUID account) {
         return jdbc.sql("SELECT * FROM habit WHERE account_id=:account ORDER BY created_at,id")
@@ -38,27 +40,32 @@ public class HabitRepository {
             VALUES (:id,:account,:name,:type,CAST(:days AS integer[]),:target,:start)
             """).param("id", id).param("account", account).param("name", draft.name()).param("type", kind)
                 .param("days", days).param("target", target).param("start", draft.startDate()).update();
+        changes.habits(account);
         return find(account, id).orElseThrow();
     }
     public void rename(UUID account, UUID id, String name) {
-        jdbc.sql("UPDATE habit SET name=:name WHERE account_id=:account AND id=:id")
+        int affected = jdbc.sql("UPDATE habit SET name=:name WHERE account_id=:account AND id=:id")
                 .param("name", name).param("account", account).param("id", id).update();
+        if (affected > 0) changes.habits(account);
     }
     public void archive(UUID account, UUID id, LocalDate date) {
-        jdbc.sql("UPDATE habit SET archived_on=COALESCE(archived_on,:date) WHERE account_id=:account AND id=:id")
+        int affected = jdbc.sql("UPDATE habit SET archived_on=COALESCE(archived_on,:date) WHERE account_id=:account AND id=:id")
                 .param("date", date).param("account", account).param("id", id).update();
+        if (affected > 0) changes.habits(account);
     }
     public List<LocalDate> completions(UUID account, UUID id, LocalDate from, LocalDate to) {
         return jdbc.sql("SELECT completion_date FROM habit_completion WHERE account_id=:account AND habit_id=:id AND completion_date BETWEEN :from AND :to ORDER BY completion_date")
                 .param("account", account).param("id", id).param("from", from).param("to", to).query(LocalDate.class).list();
     }
     public void complete(UUID account, UUID id, LocalDate date) {
-        jdbc.sql("INSERT INTO habit_completion(account_id,habit_id,completion_date) VALUES (:account,:id,:date) ON CONFLICT(habit_id,completion_date) DO NOTHING")
+        int affected = jdbc.sql("INSERT INTO habit_completion(account_id,habit_id,completion_date) VALUES (:account,:id,:date) ON CONFLICT(habit_id,completion_date) DO NOTHING")
                 .param("account", account).param("id", id).param("date", date).update();
+        if (affected > 0) changes.habits(account);
     }
     public void undo(UUID account, UUID id, LocalDate date) {
-        jdbc.sql("DELETE FROM habit_completion WHERE account_id=:account AND habit_id=:id AND completion_date=:date")
+        int affected = jdbc.sql("DELETE FROM habit_completion WHERE account_id=:account AND habit_id=:id AND completion_date=:date")
                 .param("account", account).param("id", id).param("date", date).update();
+        if (affected > 0) changes.habits(account);
     }
     public void lock(UUID account, UUID id) {
         jdbc.sql("SELECT id FROM habit WHERE account_id=:account AND id=:id FOR UPDATE")

@@ -8,7 +8,7 @@ const emptyExercise = () => ({ name: '', sets: [emptySet()] });
 const emptyWorkout = today => ({ date: today, exercises: [emptyExercise()] });
 const readableDate = date => new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T12:00:00Z`));
 
-export default function Workouts({ today, onDirtyChange }) {
+export default function Workouts({ today, onDirtyChange, externalRevision }) {
   const [month, setMonth] = useState(today.slice(0, 7));
   const [list, setList] = useState(null);
   const [revision, setRevision] = useState(0);
@@ -19,6 +19,7 @@ export default function Workouts({ today, onDirtyChange }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [remoteChanged, setRemoteChanged] = useState(false);
   const errorRef = useRef(null);
   const headingRef = useRef(null);
   const dirty = editor !== null && JSON.stringify(draft) !== original;
@@ -34,14 +35,26 @@ export default function Workouts({ today, onDirtyChange }) {
   useEffect(() => { if (editor !== null) headingRef.current?.focus(); }, [editor]);
   useEffect(() => {
     let active = true;
-    setList(null); setError('');
+    if (editor === null) setError('');
     const [year, number] = month.split('-').map(Number);
     const last = new Date(Date.UTC(year, number, 0)).getUTCDate();
     api(`/api/workouts?from=${month}-01&to=${month}-${last}`)
       .then(data => { if (active) setList(data.workouts); })
       .catch(e => { if (active) setError(e.message); });
     return () => { active = false; };
-  }, [month, revision]);
+  }, [month, revision, externalRevision]);
+  useEffect(() => { setList(null); }, [month]);
+  useEffect(() => { if (editor) setRemoteChanged(true); }, [externalRevision]);
+  useEffect(() => {
+    if (!preview || editor !== null) return;
+    let active = true;
+    api(`/api/workouts/${preview.id}`).then(value => { if (active) setPreview(value); }).catch(e => {
+      if (!active) return;
+      if (e.status === 404) { setPreview(null); setMessage('Ten trening został usunięty w innej karcie.'); }
+      else setError(e.message);
+    });
+    return () => { active = false; };
+  }, [externalRevision, editor, preview?.id]);
 
   async function act(action) {
     setBusy(true); setError(''); setMessage('');
@@ -50,7 +63,7 @@ export default function Workouts({ today, onDirtyChange }) {
   function open(workout, id = '') {
     if (!id) setPreview(null);
     const value = { date: workout.date, exercises: workout.exercises.map(e => ({ name: e.name, sets: e.sets.map(s => ({ repetitions: String(s.repetitions), weightKg: s.weightKg })) })) };
-    setDraft(value); setOriginal(JSON.stringify(value)); setEditor(id); setError(''); setMessage('');
+    setRemoteChanged(false); setDraft(value); setOriginal(JSON.stringify(value)); setEditor(id); setError(''); setMessage('');
   }
   function cancel() {
     if (!dirty || confirm('Porzucić niezapisane zmiany treningu?')) { setEditor(null); setError(''); }
@@ -87,6 +100,7 @@ export default function Workouts({ today, onDirtyChange }) {
         <button className="secondary" aria-label={`Otwórz trening ${formatDate(w.date)}`} disabled={busy} onClick={() => act(async () => setPreview(await api(`/api/workouts/${w.id}`)))}>Otwórz</button>
       </article>)}</div>}
     </> : <form className="panel workout-editor" onSubmit={save}>
+      {remoteChanged && <p className="notice" role="status">Dane na serwerze mogły się zmienić. Twój formularz pozostaje bez zmian. Aby zobaczyć aktualny zapis, anuluj edycję. Zapisanie formularza zastąpi trening Twoją wersją.</p>}
       <h2 tabIndex={-1} ref={headingRef}>{editor ? 'Edytuj trening' : 'Nowy trening'}</h2>
       <fieldset disabled={busy} className="workout-fields"><legend className="sr-only">Dane treningu</legend>
         <DateField className="workout-date-input" label="Data treningu" required max={today} value={draft.date} onChange={date => setDraft(previous => ({ ...previous, date }))} />

@@ -2,6 +2,7 @@ package cc.intmain.nawyki.http;
 
 import cc.intmain.nawyki.application.AccountService;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,6 +36,7 @@ public class WebSecurity {
                 .formLogin(config -> config.disable()).httpBasic(config -> config.disable()).logout(config -> config.disable())
                 .requestCache(config -> config.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
                         .requestMatchers("/", "/index.html", "/assets/**", "/favicon.ico", "/error", "/api/health/**", "/api/status",
                                 "/api/auth/csrf", "/api/auth/me", "/api/auth/login", "/api/accounts").permitAll()
                         .anyRequest().authenticated())
