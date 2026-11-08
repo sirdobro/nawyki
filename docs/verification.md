@@ -102,3 +102,10 @@ Commit 31f6093: GitHub Actions https://github.com/sirdobro/nawyki/actions/runs/4
 Sprawdzono dni wolne, otwarte terminy, pominięte zamknięte terminy, bieżącą i najlepszą serię, okresy środa–wtorek, nadwyżkę ponad cel, archiwizację i skrócony ostatni okres, duplikaty/kolejność/historię poza harmonogramem, raport bez obcinania serii, izolację kont, licznik treningów, korektę historii i błędne filtry. CyclicBarrier wymaga jednoczesnego rozpoczęcia dwóch zadań; test sprawdza nakładanie pracy bez testowania szybkości. Inne testy obejmują błąd, odrzucenie pracy i przerwanie.
 
 Zgodnie z uzgodnieniem agent nie uruchamiał żadnych testów lokalnych/VPS, przeglądarek ani ad hoc API. Testy integracyjne GitHub Actions używały jednorazowego PostgreSQL, nie bazy online. Ręczna akceptacja układu i obsługi w Firefoksie należy do użytkownika. Dwa SSE nadal nie są zaimplementowane. Publikację/wdrożenie potwierdza się oddzielnie od verify.
+
+
+## Stabilny widok po zaznaczeniu nawyku — 2026-11-08
+
+Użytkownik zgłosił miganie listy podczas ręcznych prób w Firefoksie. Przegląd bieżącego kodu i wersji a22e5a7 potwierdził wcześniejsze czyszczenie plan=null przy każdej zmianie revision (zapis wykonania), a następnie zastępowanie listy komunikatem ładowania. Ostatni podział na sekcje mógł uwidocznić ten efekt; nie jest to przeładowanie całego dokumentu.
+
+Usunięto czyszczenie planu, historii i serii podczas odświeżania po zapisie. Reset prywatnych danych pozostaje przy zmianie konta, reset historii przy wyborze innego nawyku; komponent serii ma klucz identyfikatora nawyku. Zmiana daty nadal ukrywa poprzedni plan przez porównanie plan.date z wybraną datą. Poprzedni poprawny widok zostaje podczas pobierania, a serwerowa odpowiedź aktualizuje istniejące elementy. Nie dodano optymistycznego potwierdzania zapisów ani nowych zależności. Wynik builda/testów i ręczna akceptacja poprawki wymagają osobnego potwierdzenia; agent nie uruchamia przeglądarki.

@@ -12,7 +12,7 @@ export function Streak({ value }) {
 export function HabitStreak({ id, revision }) {
   const [data, setData] = useState(null), [error, setError] = useState(''), [retry, setRetry] = useState(0);
   useEffect(() => {
-    let active = true; setData(null); setError('');
+    let active = true; setError('');
     api(`/api/habits/${id}/progress`).then(value => { if (active) setData(value); }).catch(e => { if (active) setError(e.message); });
     return () => { active = false; };
   }, [id, revision, retry]);
