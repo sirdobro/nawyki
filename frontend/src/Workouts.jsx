@@ -13,6 +13,7 @@ export default function Workouts({ today, onDirtyChange }) {
   const [list, setList] = useState(null);
   const [revision, setRevision] = useState(0);
   const [editor, setEditor] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [draft, setDraft] = useState(emptyWorkout(today));
   const [original, setOriginal] = useState('');
   const [busy, setBusy] = useState(false);
@@ -47,6 +48,7 @@ export default function Workouts({ today, onDirtyChange }) {
     try { await action(); } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
   function open(workout, id = '') {
+    if (!id) setPreview(null);
     const value = { date: workout.date, exercises: workout.exercises.map(e => ({ name: e.name, sets: e.sets.map(s => ({ repetitions: String(s.repetitions), weightKg: s.weightKg })) })) };
     setDraft(value); setOriginal(JSON.stringify(value)); setEditor(id); setError(''); setMessage('');
   }
@@ -62,26 +64,27 @@ export default function Workouts({ today, onDirtyChange }) {
   async function save(event) {
     event.preventDefault();
     await act(async () => {
-      await api(editor ? `/api/workouts/${editor}` : '/api/workouts', editor ? 'PUT' : 'POST', draft);
+      const saved = await api(editor ? `/api/workouts/${editor}` : '/api/workouts', editor ? 'PUT' : 'POST', draft);
+      setPreview(saved);
       setMonth(draft.date.slice(0, 7)); setEditor(null); setRevision(n => n + 1); setMessage('Trening zapisany.');
     });
   }
   async function remove() {
     if (!confirm('Trwale usunąć ten trening wraz z ćwiczeniami i seriami?')) return;
-    await act(async () => { await api(`/api/workouts/${editor}`, 'DELETE'); setEditor(null); setRevision(n => n + 1); setMessage('Trening usunięty.'); });
+    await act(async () => { await api(`/api/workouts/${editor}`, 'DELETE'); setPreview(null); setEditor(null); setRevision(n => n + 1); setMessage('Trening usunięty.'); });
   }
 
   return <section aria-label="Dziennik treningów">
     <div className="page-heading"><div><p className="eyebrow">TWÓJ ZAPIS AKTYWNOŚCI</p><h1>Treningi</h1><p className="muted">Ćwiczenia i serie, do których możesz wrócić.</p></div>
-      {editor === null && <button disabled={busy} onClick={() => open(emptyWorkout(today))}>+ Dodaj trening</button>}
+      {editor === null && !preview && <button disabled={busy} onClick={() => open(emptyWorkout(today))}>+ Dodaj trening</button>}
     </div>
     {error && <div className="notice error" role="alert" ref={errorRef} tabIndex={-1}>{error}</div>}
     {message && <div className="notice" role="status">{message}</div>}
-    {editor === null ? <>
+    {editor === null ? preview ? <WorkoutPreview key={preview.id} workout={preview} busy={busy} onEdit={() => open(preview, preview.id)} onBack={() => { setPreview(null); setError(''); setMessage(''); }} /> : <>
       <DateField className="workout-month" label="Miesiąc" monthOnly required value={month} max={today.slice(0, 7)} onChange={value => { if (value) setMonth(value); }} />
       {!list ? (error ? <button className="secondary" onClick={() => setRevision(n => n + 1)}>Spróbuj ponownie</button> : <p role="status">Wczytujemy treningi…</p>) : list.length === 0 ? <div className="panel empty"><h2>Jeszcze bez wpisów w tym miesiącu</h2><p>Zapisz ćwiczenia i serie z treningu. Zacznij od jednego ćwiczenia.</p><button onClick={() => open(emptyWorkout(today))}>Dodaj pierwszy trening</button></div> : <div className="workout-list">{list.map(w => <article className="habit-row" key={w.id}>
         <div><h2 className="workout-date">{readableDate(w.date)}</h2><p className="workout-summary">{w.exerciseNames.join(' · ')}</p><small>Serie: {w.setCount} · Ćwiczenia: {w.exerciseNames.length}</small></div>
-        <button className="secondary" aria-label={`Otwórz trening ${formatDate(w.date)}`} disabled={busy} onClick={() => act(async () => open(await api(`/api/workouts/${w.id}`), w.id))}>Otwórz</button>
+        <button className="secondary" aria-label={`Otwórz trening ${formatDate(w.date)}`} disabled={busy} onClick={() => act(async () => setPreview(await api(`/api/workouts/${w.id}`)))}>Otwórz</button>
       </article>)}</div>}
     </> : <form className="panel workout-editor" onSubmit={save}>
       <h2 tabIndex={-1} ref={headingRef}>{editor ? 'Edytuj trening' : 'Nowy trening'}</h2>
@@ -105,5 +108,20 @@ export default function Workouts({ today, onDirtyChange }) {
       </fieldset>
       <div className="actions workout-save"><button disabled={busy}>{busy ? 'Zapisujemy…' : 'Zapisz trening'}</button><button type="button" className="secondary" disabled={busy} onClick={cancel}>Anuluj</button>{editor && <button type="button" className="quiet danger-text" disabled={busy} onClick={remove}>Usuń trening</button>}</div>
     </form>}
+  </section>;
+}
+
+
+function WorkoutPreview({ workout, busy, onEdit, onBack }) {
+  const heading = useRef(null);
+  useEffect(() => { heading.current?.focus(); }, []);
+  return <section className="panel workout-preview" aria-labelledby="workout-preview-title">
+    <div className="page-heading"><div><p className="eyebrow">ZAPISANY TRENING</p><h2 id="workout-preview-title" ref={heading} tabIndex={-1}>{readableDate(workout.date)}</h2></div><div className="actions"><button className="secondary" disabled={busy} onClick={onBack}>Wróć do listy</button><button disabled={busy} onClick={onEdit}>Edytuj</button></div></div>
+    {workout.exercises.map((exercise, i) => <section className="workout-preview-exercise" key={i}>
+      <h3>{exercise.name}</h3>
+      <table><caption className="sr-only">Serie ćwiczenia {i + 1}: {exercise.name}</caption><thead><tr><th scope="col">Seria</th><th scope="col">Powtórzenia</th><th scope="col">Ciężar (kg)</th></tr></thead><tbody>
+        {exercise.sets.map((set, j) => <tr key={j}><th scope="row">{j + 1}</th><td>{set.repetitions}</td><td>{set.weightKg === '' ? <span className="muted">Nie zapisano</span> : String(set.weightKg).replace('.', ',')}</td></tr>)}
+      </tbody></table>
+    </section>)}
   </section>;
 }
