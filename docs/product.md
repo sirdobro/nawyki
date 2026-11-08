@@ -62,3 +62,5 @@ Puste widoki prowadzą do pierwszego wpisu. Formularze zachowują dane po błęd
 
 
 Daty w interfejsie mają jawny polski zapis: DD-MM-RRRR, skróty historii DD-MM, filtr miesiąca MM-RRRR; nazwy miesięcy są polskie. Wspólny komponent DateField udostępnia wpisywanie oraz własny kalendarz z tygodniem od poniedziałku. Nie polegamy na formacie natywnych pól date/month zależnym od przeglądarki. Warstwa API i baza nadal korzystają z ISO YYYY-MM-DD. Ręczny zapis z kropką/ukośnikiem lub bez separatorów jest zawsze interpretowany dzień–miesiąc–rok i normalizowany na DD-MM-RRRR.
+
+Usprawnienia formularzy: Podsumowanie wybiera miesiąc bezpośrednio, a tydzień strzałkami z jawnym zakresem dat. Dodaj serię kopiuje powtórzenia i opcjonalny ciężar z ostatniej serii tego samego ćwiczenia do nowego, niezależnie edytowalnego wiersza (również przy edycji treningu). Nowe ćwiczenie nadal zaczyna od pustej serii.

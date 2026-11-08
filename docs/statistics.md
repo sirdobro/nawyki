@@ -11,7 +11,7 @@
 
 ## Interfejs i zakres raportu
 
-Zakładka Podsumowanie wybiera tydzień kalendarzowy lub miesiąc oraz dzień w tym okresie. Wykonania i liczba treningów obejmują tylko wybrany zakres do dzisiaj. Codzienne/wybrane terminy mają licznik wykonane/zaplanowane do dzisiaj, bez przyszłych dat. Dzisiejszy termin może być w toku; procent jest bieżącym postępem, a nie oceną zamkniętego okresu.
+Zakładka Podsumowanie wybiera tydzień kalendarzowy strzałkami (z widocznym zakresem dat) lub bezpośrednio miesiąc w polu MM-RRRR. Nie pokazujemy pomocniczego dnia wewnątrz okresu. Wykonania i liczba treningów obejmują tylko wybrany zakres do dzisiaj. Codzienne/wybrane terminy mają licznik wykonane/zaplanowane do dzisiaj, bez przyszłych dat. Dzisiejszy termin może być w toku; procent jest bieżącym postępem, a nie oceną zamkniętego okresu.
 
 Tygodniowe cele mają osobne wiersze pełnych okresów przecinających filtr raportu. Ich liczniki obejmują cały własny tydzień nawyku, także daty poza wybranym miesiącem. Wiersze pokazują daty, wykonania/cel, procent ograniczony do 100% i MET/MISSED/IN_PROGRESS/PARTIAL z polskimi etykietami. Nie sumujemy procentów różnych harmonogramów w jeden mylący wynik.
 

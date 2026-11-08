@@ -3,6 +3,8 @@ import { api } from './api';
 import DateField from './DateField';
 import { formatDate } from './dates';
 
+const shiftDate = (date, days) => { const value = new Date(`${date}T12:00:00Z`); value.setUTCDate(value.getUTCDate() + days); return value.toISOString().slice(0, 10); };
+const monday = date => shiftDate(date, 1 - (new Date(`${date}T12:00:00Z`).getUTCDay() || 7));
 const statuses = { MET: 'Cel osiągnięty', MISSED: 'Cel nieosiągnięty', IN_PROGRESS: 'W toku', PARTIAL: 'Skrócony okres — poza oceną' };
 export function Streak({ value }) {
   const unit = value.unit === 'WEEKS' ? 'tyg.' : 'terminów';
@@ -29,7 +31,10 @@ export default function Statistics({ today, revision }) {
     return () => { active = false; };
   }, [period, date, valid, revision, retry]);
   return <section aria-labelledby="statistics-title"><div className="page-heading"><div><p className="eyebrow">TWOJA REGULARNOŚĆ</p><h1 id="statistics-title">Podsumowanie</h1></div></div>
-    <div className="report-filters"><label>Zakres<select value={period} onChange={e => setPeriod(e.target.value)}><option value="week">Tydzień</option><option value="month">Miesiąc</option></select></label><DateField key={retry} label="Dzień w wybranym okresie" value={date} onChange={value => { if (value) setDate(value); }} max={today} required onValidityChange={setValid} /><button className="quiet" onClick={() => { setDate(today); setRetry(n => n + 1); }}>Bieżący okres</button></div>
+    <div className="report-filters"><label>Zakres<select value={period} onChange={e => { setPeriod(e.target.value); setValid(true); }}><option value="week">Tydzień</option><option value="month">Miesiąc</option></select></label>
+      {period === 'month' ? <DateField key={`month-${retry}`} label="Miesiąc" monthOnly value={date.slice(0, 7)} onChange={value => { if (value) setDate(`${value}-01`); }} max={today.slice(0, 7)} required onValidityChange={setValid} />
+        : <div className="report-week"><span id="report-week-label">Tydzień</span><div className="actions" role="group" aria-labelledby="report-week-label"><button className="secondary" aria-label="Poprzedni tydzień" onClick={() => setDate(shiftDate(monday(date), -7))}>←</button><span className="report-week-range">{formatDate(monday(date))} – {formatDate(shiftDate(monday(date), 6))}</span><button className="secondary" aria-label="Następny tydzień" disabled={monday(date) >= monday(today)} onClick={() => setDate(shiftDate(monday(date), 7))}>→</button></div></div>}
+      <button className="quiet" onClick={() => { setDate(today); setValid(true); setRetry(n => n + 1); }}>Bieżący okres</button></div>
     {!valid ? <p role="status">Wybierz poprawną datę.</p> : error ? <div className="notice error" role="alert">{error} <button className="secondary" onClick={() => setRetry(n => n + 1)}>Spróbuj ponownie</button></div> : !data ? <p role="status">Obliczanie podsumowania…</p> : <>
       <p className="report-range">{formatDate(data.from)} – {formatDate(data.to)}{data.to > data.today && ` · dane do ${formatDate(data.today)}`}</p>
       <div className="report-overview"><div className="panel"><span>Wykonania nawyków w okresie</span><strong>{data.habits.reduce((sum, h) => sum + h.progress.completed, 0)}</strong></div><div className="panel"><span>Treningi w okresie</span><strong>{data.workoutCount}</strong></div></div>

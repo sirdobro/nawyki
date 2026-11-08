@@ -98,7 +98,7 @@ export default function Workouts({ today, onDirtyChange }) {
             <label><span className="sr-only">Ciężar kg — ćwiczenie {i + 1}, seria {j + 1}, opcjonalny</span><input type="text" inputMode="decimal" maxLength={8} placeholder="—" value={set.weightKg} onChange={e => setChange(i, j, 'weightKg', e.target.value)} /></label>
             <button type="button" className="quiet remove-set" disabled={exercise.sets.length === 1} aria-label={`Usuń serię ${j + 1} z ćwiczenia ${i + 1}`} onClick={() => exerciseChange(i, old => ({ ...old, sets: old.sets.filter((_, n) => n !== j) }))}>×</button>
           </div>)}
-          <div className="actions"><button type="button" className="secondary" disabled={exercise.sets.length >= 30} onClick={() => exerciseChange(i, old => ({ ...old, sets: [...old.sets, emptySet()] }))}>+ Dodaj serię</button>
+          <div className="actions"><button type="button" className="secondary" disabled={exercise.sets.length >= 30} onClick={() => exerciseChange(i, old => ({ ...old, sets: [...old.sets, { ...old.sets[old.sets.length - 1] }] }))}>+ Dodaj serię</button>
             <button type="button" className="quiet" disabled={draft.exercises.length === 1} onClick={() => setDraft({ ...draft, exercises: draft.exercises.filter((_, n) => n !== i) })}>Usuń ćwiczenie {i + 1}</button></div>
         </fieldset>)}
         <button type="button" className="secondary" disabled={draft.exercises.length >= 30} onClick={() => setDraft({ ...draft, exercises: [...draft.exercises, emptyExercise()] })}>+ Dodaj ćwiczenie</button>
