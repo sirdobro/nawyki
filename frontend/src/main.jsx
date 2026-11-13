@@ -83,7 +83,7 @@ function App() {
       </>}
     </>}
     {account && <p className="sync-status" role="status">{syncStatus === 'live' ? 'Synchronizacja aktywna' : syncStatus === 'limited' ? 'Za dużo otwartych kart. Zamknij część z nich i odśwież stronę.' : syncStatus === 'reconnecting' ? 'Synchronizacja przerwana. Ponawiamy połączenie…' : 'Łączenie synchronizacji…'}</p>}
-    <footer><span>Nawyki · projekt studencki</span><span>Daty: Europe/Warsaw · dane testowe</span></footer>
+    <footer><span>Nawyki · projekt studencki</span></footer>
   </div>;
 }
 function HabitForm({ today, busy, onCancel, onSave }) {
