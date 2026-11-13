@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api';
 import DateField from './DateField';
+import { quantity, completedDays } from './polish';
 import { formatDate } from './dates';
 
 const shiftDate = (date, days) => { const value = new Date(`${date}T12:00:00Z`); value.setUTCDate(value.getUTCDate() + days); return value.toISOString().slice(0, 10); };
 const monday = date => shiftDate(date, 1 - (new Date(`${date}T12:00:00Z`).getUTCDay() || 7));
-const statuses = { MET: 'Cel osiągnięty', MISSED: 'Cel nieosiągnięty', IN_PROGRESS: 'W toku', PARTIAL: 'Skrócony okres — poza oceną' };
+const statuses = { MET: 'Cel osiągnięty', MISSED: 'Cel nieosiągnięty', IN_PROGRESS: 'W toku', PARTIAL: 'Niepełny tydzień — nie wpływa na serię' };
 export function Streak({ value }) {
-  const unit = value.unit === 'WEEKS' ? 'tyg.' : 'terminów';
-  return <p className="streak-line">{value.archived ? 'Seria przy archiwizacji' : 'Bieżąca seria'}: <strong>{value.current} {unit}</strong><span>Najlepsza: <strong>{value.best} {unit}</strong></span></p>;
+  const unit = value.unit === 'WEEKS' ? 'weeks' : 'completions';
+  return <p className="streak-line">{value.archived ? 'Seria w chwili archiwizacji' : 'Bieżąca seria'}: <strong>{quantity(value.current, unit)} z rzędu</strong><span>Najlepsza: <strong>{quantity(value.best, unit)} z rzędu</strong></span></p>;
 }
 
 export function HabitStreak({ id, revision }) {
@@ -38,12 +39,12 @@ export default function Statistics({ today, revision }) {
       <button className="quiet" onClick={() => { setDate(today); setValid(true); setRetry(n => n + 1); }}>Bieżący okres</button></div>
     {!valid ? <p role="status">Wybierz poprawną datę.</p> : error ? <div className="notice error" role="alert">{error} <button className="secondary" onClick={() => setRetry(n => n + 1)}>Spróbuj ponownie</button></div> : !data ? <p role="status">Obliczanie podsumowania…</p> : <>
       <p className="report-range">{formatDate(data.from)} – {formatDate(data.to)}{data.to > data.today && ` · dane do ${formatDate(data.today)}`}</p>
-      <div className="report-overview"><div className="panel"><span>Wykonania nawyków w okresie</span><strong>{data.habits.reduce((sum, h) => sum + h.progress.completed, 0)}</strong></div><div className="panel"><span>Treningi w okresie</span><strong>{data.workoutCount}</strong></div></div>
-      <p className="muted">Serie obejmują całą historię do dzisiaj. Dni wolne i otwarty okres nie przerywają serii. Dla zarchiwizowanych nawyków zachowujemy wynik z końca ich aktywności.</p>
+      <div className="report-overview"><div className="panel"><span>Wykonania nawyków</span><strong>{data.habits.reduce((sum, h) => sum + h.progress.completed, 0)}</strong></div><div className="panel"><span>Treningi</span><strong>{data.workoutCount}</strong></div></div>
+      <p className="muted">Serie obejmują całą historię do dzisiaj. Dni bez zaplanowanego nawyku nie przerywają serii. Na wykonanie nawyku masz czas do końca dnia, a na osiągnięcie celu tygodniowego — do końca tygodnia. Dla zarchiwizowanych nawyków zachowujemy wynik z końca ich aktywności.</p>
       {!data.habits.length && <div className="panel empty"><h2>Brak nawyków w tym okresie</h2><p>Wybierz inny okres lub dodaj nawyk w zakładce „Moje nawyki”.</p></div>}
       {data.habits.map(h => <article className="panel report-habit" key={h.id}><h2>{h.name}</h2><Streak value={h.progress.streak} />
-        {h.scheduleType === 'WEEKLY_GOAL' ? <><p>Wykonania w wybranym okresie: <strong>{h.progress.completed}</strong>. Cel: <strong>{h.weeklyTarget} różnych dni na 7 dni</strong>.</p><p className="muted">Tygodnie liczymy od daty rozpoczęcia nawyku. Poniżej całe okresy, które przecinają wybrany zakres — ich liczniki mogą obejmować dni spoza niego. Nadwyżka nie zwiększa realizacji powyżej 100%.</p><ul className="weekly-periods">{h.progress.periods.map(p => <li key={p.from}><span>{formatDate(p.from)} – {formatDate(p.to)}</span><strong>{p.completed}/{p.target} · {Math.min(100, Math.round(p.completed / p.target * 100))}%</strong><span>{statuses[p.status]}</span></li>)}</ul></>
-          : <><p><strong>{h.progress.completed}/{h.progress.scheduled}</strong> wykonanych terminów do dzisiaj{h.progress.scheduled > 0 && ` · ${Math.round(h.progress.completed / h.progress.scheduled * 100)}%`}</p><p className="muted">{h.progress.periods.some(p => p.status === 'IN_PROGRESS') ? 'Dzisiejszy termin jest jeszcze w toku.' : 'Brak otwartego terminu w tym okresie.'} Przyszłe terminy nie wchodzą do wyniku.</p></>}
+        {h.scheduleType === 'WEEKLY_GOAL' ? <><p>Wykonania: <strong>{h.progress.completed}</strong>. Cel: <strong>{quantity(h.weeklyTarget, 'days')} w tygodniu</strong>.</p><p className="muted">Tygodnie liczymy od daty rozpoczęcia nawyku. Każdy tydzień trwa 7 dni. Poniżej pokazujemy pełne tygodnie nawyku, także gdy część dni wypada poza wybranym zakresem. Możesz wykonać nawyk częściej, ale wynik nie przekroczy 100%.</p><ul className="weekly-periods">{h.progress.periods.map(p => <li key={p.from}><span>{formatDate(p.from)} – {formatDate(p.to)}</span><strong>{completedDays(p.completed, p.target)} · {Math.min(100, Math.round(p.completed / p.target * 100))}%</strong><span>{statuses[p.status]}</span></li>)}</ul></>
+          : <><p><strong>Wykonane: {h.progress.completed} z {h.progress.scheduled}</strong>{h.progress.scheduled > 0 && ` · ${Math.round(h.progress.completed / h.progress.scheduled * 100)}%`}</p><p className="muted">{h.progress.periods.some(p => p.status === 'IN_PROGRESS') ? 'Możesz jeszcze wykonać nawyk dzisiaj.' : ''} Wynik uwzględnia tylko dni do dzisiaj.</p></>}
       </article>)}
     </>}
   </section>;

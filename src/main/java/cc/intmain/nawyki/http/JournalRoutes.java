@@ -180,7 +180,7 @@ public class JournalRoutes {
     private ServerResponse dayPlan(ServerRequest request) {
         UUID account = requiredAccount(request);
         LocalDate date = LocalDate.parse(request.param("date").orElse(today().toString()));
-        if (date.isAfter(today())) return error(422, "FUTURE_DATE", "Nie można oznaczać przyszłych dni.");
+        if (date.isAfter(today())) return error(422, "FUTURE_DATE", "Nie można zaznaczać nawyków z przyszłą datą.");
         var items = habits.list(account).stream().filter(h -> !date.isBefore(h.startDate()))
                 .filter(h -> h.archivedOn().filter(end -> !date.isBefore(end)).isEmpty())
                 .filter(h -> h.schedule().availableOn(date)).map(h -> {

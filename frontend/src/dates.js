@@ -26,7 +26,7 @@ export function parseDateInput(text, monthOnly = false) {
 export function dateInputError(text, { monthOnly = false, max = '', required = false } = {}) {
   if (!text.trim()) return required ? (monthOnly ? 'Wybierz miesiąc.' : 'Podaj datę.') : '';
   const value = parseDateInput(text, monthOnly);
-  if (!value) return `Podaj poprawny ${monthOnly ? 'miesiąc w formacie MM-RRRR' : 'dzień w formacie DD-MM-RRRR'}.`;
+  if (!value) return monthOnly ? 'Podaj poprawny miesiąc w formacie MM-RRRR.' : 'Podaj poprawną datę w formacie DD-MM-RRRR.';
   if (max && value > max) return `Wybierz ${monthOnly ? 'miesiąc' : 'datę'} nie późniejsz${monthOnly ? 'y' : 'ą'} niż ${monthOnly ? formatMonth(max) : formatDate(max)}.`;
   return '';
 }

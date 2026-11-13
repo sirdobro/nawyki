@@ -68,3 +68,9 @@ Usprawnienia formularzy: Podsumowanie wybiera miesiąc bezpośrednio, a tydzień
 Treningi: Otwórz prowadzi do podglądu zapisanej daty, ćwiczeń i serii w tabelach, bez pól formularza. Edytuj otwiera formularz dopiero na żądanie. Anulowanie edycji przywraca niezmieniony podgląd, udany zapis pokazuje podgląd odpowiedzi serwera (także po utworzeniu nowego treningu). Wróć do listy zachowuje wybrany miesiąc; usunięcie z formularza wraca do listy. Pusty ciężar opisujemy jako Nie zapisano, zero pozostaje widoczne.
 
 Dwa SSE odświeżają tylko dane zalogowanego konta. Podsumowanie reaguje na oba kanały. Własne i zdalne aktualizacje zachowują widok podczas pobierania; otwarty formularz treningu nie jest nadpisywany. Szczegóły i scenariusze akceptacji: sse.md.
+
+## Język interfejsu
+
+Nawyk oznacza zaplanowaną czynność, wykonanie — pojedyncze zaznaczenie w historii. Nie nazywamy nawyku zadaniem ani jego wykonania terminem. Ekran dnia: Nawyki na ten dzień, Cele tygodniowe, Wykonane: X z Y. Podsumowanie: Wykonania nawyków; serie: wykonania z rzędu albo tygodnie z rzędu. Seria w treningu zachowuje swoje odrębne znaczenie. Instrukcja historii mówi o zaznaczeniu/cofnięciu wykonania nawyku.
+
+polish.js używa wbudowanego Intl.PluralRules('pl') dla całkowitych liczników: 1 dzień, 21 dni; 1 wykonanie, 2 wykonania, 5/12/21 wykonań, 22 wykonania; analogicznie tygodnie, treningi, serie i ćwiczenia. Po przyimku z stosujemy 1 dnia / 2 dni, np. Wykonane: 1 z 1 dnia. Testy obejmują zero, 1, 2–4, 5+, 11–14 i odpowiednie końcówki liczb trzycyfrowych. Dotyczy tekstów widocznych, komunikatów i dostępności; nazwy API i modelu pozostają technicznym kontraktem.

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import DateField from './DateField';
+import { quantity } from './polish';
 import { formatDate } from './dates';
 
 const emptySet = () => ({ repetitions: '', weightKg: '' });
@@ -96,7 +97,7 @@ export default function Workouts({ today, onDirtyChange, externalRevision }) {
     {editor === null ? preview ? <WorkoutPreview key={preview.id} workout={preview} busy={busy} onEdit={() => open(preview, preview.id)} onBack={() => { setPreview(null); setError(''); setMessage(''); }} /> : <>
       <DateField className="workout-month" label="Miesiąc" monthOnly required value={month} max={today.slice(0, 7)} onChange={value => { if (value) setMonth(value); }} />
       {!list ? (error ? <button className="secondary" onClick={() => setRevision(n => n + 1)}>Spróbuj ponownie</button> : <p role="status">Wczytujemy treningi…</p>) : list.length === 0 ? <div className="panel empty"><h2>Jeszcze bez wpisów w tym miesiącu</h2><p>Zapisz ćwiczenia i serie z treningu. Zacznij od jednego ćwiczenia.</p><button onClick={() => open(emptyWorkout(today))}>Dodaj pierwszy trening</button></div> : <div className="workout-list">{list.map(w => <article className="habit-row" key={w.id}>
-        <div><h2 className="workout-date">{readableDate(w.date)}</h2><p className="workout-summary">{w.exerciseNames.join(' · ')}</p><small>Serie: {w.setCount} · Ćwiczenia: {w.exerciseNames.length}</small></div>
+        <div><h2 className="workout-date">{readableDate(w.date)}</h2><p className="workout-summary">{w.exerciseNames.join(' · ')}</p><small>{quantity(w.setCount, 'sets')} · {quantity(w.exerciseNames.length, 'exercises')}</small></div>
         <button className="secondary" aria-label={`Otwórz trening ${formatDate(w.date)}`} disabled={busy} onClick={() => act(async () => setPreview(await api(`/api/workouts/${w.id}`)))}>Otwórz</button>
       </article>)}</div>}
     </> : <form className="panel workout-editor" onSubmit={save}>

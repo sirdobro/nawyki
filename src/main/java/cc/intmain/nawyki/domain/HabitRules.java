@@ -46,9 +46,9 @@ public final class HabitRules {
     public static Result<LocalDate> validateCompletion(Habit habit, LocalDate date, LocalDate today) {
         var errors = new ArrayList<Violation>();
         if (date.isAfter(today) || date.isBefore(habit.startDate()))
-            errors.add(new Violation("date", "Data wykonania musi mieścić się między początkiem nawyku a dzisiaj."));
+            errors.add(new Violation("date", "Wybierz datę od dnia rozpoczęcia nawyku do dzisiaj."));
         if (habit.archivedOn().filter(end -> !date.isBefore(end)).isPresent())
-            errors.add(new Violation("date", "Nawyk był już zarchiwizowany w tym dniu."));
+            errors.add(new Violation("date", "Nie można zaznaczać nawyku od dnia jego archiwizacji."));
         if (!habit.schedule().availableOn(date))
             errors.add(new Violation("date", "Nawyk nie jest zaplanowany na ten dzień."));
         return errors.isEmpty() ? new Ok<>(date) : new Invalid<>(errors);
